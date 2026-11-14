@@ -80,7 +80,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.45';
+const VERSION='0.46';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -866,6 +866,9 @@ function hurt(srcX){if(P.inv>0||state!=='play'||P.warp||P.mount)return;
   if(P.hearts<=0){setState('oneMore');stopSong();}}
 function splashAt(x){sfx('splash');for(let i=0;i<14;i++)parts.push({kind:'dot',x:x+(Math.random()-.5)*20,y:GY+8,vx:(Math.random()-.5)*5,vy:-Math.random()*6-2,life:30,c:i%2?'#bfe6ff':'#ffffff'});}
 function unduck(){if(P.crouch){P.h+=P.crouch;P.y-=P.crouch;P.crouch=0;}}
+// Easy/Normal: a fish knocks you back and knocks up to 3 eggs loose (grab them back). Hard: it costs a heart.
+function fishBump(e){if(P.inv>0||P.mount||P.warp)return;const away=(P.x+P.w/2<e.x+e.w/2)?-1:1;P.inv=90;P.vy=-7;P.vx=away*4;sfx('splash');shake=4;
+  const n=Math.min(3,L.eggs);L.eggs-=n;for(let k=0;k<n;k++)L.items.push({t:'egg',x:P.x+P.w/2-10,y:P.y-6,w:20,h:24,vx:away*(1+k*1.2),vy:-6-k,phys:true,age:0});burst(P.x+P.w/2,P.y+10,'#bfe6ff',10);}
 function fallPit(){unduck();P.peakY=null;P.climb=false;if(P.ride)endGooseRide(true);if(P.hat){P.hat=false;sfx('hatoff');}else if(!EASY()){P.hearts--;sfx('hurt');}
   if(P.hearts<=0){setState('oneMore');stopSong();return;}
   P.x=P.safe.x;P.y=P.safe.y;P.vx=P.vy=0;P.inv=90;G.x=P.x-30;G.y=P.y+P.h-G.h;G.vy=0;burst(P.x+P.w/2,P.y+P.h,'#fff',8);updCam(true);}
@@ -1044,9 +1047,10 @@ function stepPlay(){
       if(e.onG){const ax=e.vx>0?e.x+e.w+2:e.x-2;const c=tileAt(Math.floor(ax/T),Math.floor((e.y+e.h+4)/T));if(!solidC(c)&&!ONEWAY(c))e.vx=-e.vx;}
       if(!e.saddle&&Math.abs(e.x-P.x)<260&&e.t0%150===0){e.honkT=40;sfx('honk');}
       if(e.y>ROWS*T+40)e.gone=true;}
-    else if(e.t==='fish'){if(e.home==null)e.home=e.x;if(e.hide){e.y=GY+40;e.x=e.home;if(--e.wait<=0&&Math.abs(e.x-P.x)<700){const dx=P.x+P.w/2-(e.home+13),near=Math.abs(dx)<240;e.hide=false;e.y=GY+14;
-          if(near){const hs=P.h+(P.crouch||0),fy=P.y+P.h,yb=fy-(Math.round(hs*.5)+5),rise=Math.max(24,(GY+14)-(yb-16)),t=Math.max(12,Math.abs(dx)/5.5);e.grav=2*rise/(t*t);e.vy=-e.grav*t;e.vx=dx/t;}else{e.grav=.42;e.vy=-(10+Math.random()*2);e.vx=(Math.random()-.5)*1.2;}if(Math.abs(dx)<500)sfx('splash');}continue;}
-      e.vy+=e.grav||.42;e.y+=e.vy;e.x+=e.vx;e.rot=e.vy*.07;if(e.vy>0&&e.y>GY+14){e.hide=true;e.wait=90+Math.random()*90;continue;}}
+    else if(e.t==='fish'){if(e.home==null){e.home=e.x;e.dir=((e.home/T)|0)%2?1:-1;e.period=130+((e.home/T)|0)%3*25;}
+      // each fish leaps on its own steady rhythm, alternating direction, in the same arc every time
+      if(e.hide){e.y=GY+40;e.x=e.home;if(--e.wait<=0){e.hide=false;e.y=GY+14;e.vy=-8.2;e.vx=e.dir*2.3;e.grav=.42;e.dir=-e.dir;if(Math.abs(e.home-P.x)<500)sfx('splash');}continue;}
+      e.vy+=e.grav;e.y+=e.vy;e.x+=e.vx;e.rot=e.vy*.07;if(e.vy>0&&e.y>GY+14){e.hide=true;e.wait=e.period-40;e.x=e.home+e.vx*0;continue;}}
     else if(e.t==='pumpkin'||e.t==='bale'){e.vy=Math.min(e.vy+.5,10);moveX(e);if(e.hitW){killEnemy(e);continue;}moveY(e);e.rot+=e.vx/13;if(e.y>ROWS*T+40)e.gone=true;}
     if(G.mode==='dash'&&!e.saddle&&overlap(G,e)){killEnemy(e);sfx('bonk');popText(e.t==='goose'?'BONK!':e.t==='bale'?'POOF!':'SPLAT!',e.x+e.w/2,e.y-10,'#fff');addEgg(1);continue;}
     if(overlap(P,e)){
@@ -1054,6 +1058,7 @@ function stepPlay(){
       if(riding){killEnemy(e);P.vy=Math.min(P.vy,-6);addEgg(1);continue;}
       if(P.vy>0&&P.y+P.h-P.vy<=e.y+12){killEnemy(e);P.vy=inp.jump?-12:-9;P.jumping=inp.jump;sfx('stomp');P.chain++;
         if(P.chain>=2){const words=['','','DOUBLE!','TRIPLE!','QUAD!'];popText((words[P.chain]||'MEGA!')+' +'+P.chain,P.x+P.w/2,P.y-26,'#7fe3ff',true);for(let k=0;k<P.chain;k++)addEgg(1);}else addEgg(1);continue;}
+      if(e.t==='fish'&&!HARD()){fishBump(e);continue;}
       hurt(e.x+e.w/2);if(state!=='play')return;}}
   L.ents=L.ents.filter(e=>!e.gone&&!(!e.alive&&e.dead>40));
   // items
