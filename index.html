@@ -10,16 +10,19 @@
 html,body{margin:0;height:100%;background:#1e140f;overflow:hidden;position:fixed;inset:0;overscroll-behavior:none;-webkit-text-size-adjust:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 canvas{display:block;background:#4fb3ff;touch-action:none}
-.ctl{touch-action:none;position:fixed;bottom:max(8px,env(safe-area-inset-bottom));display:none;gap:14px;z-index:5;align-items:flex-end}
-.ctl.left{left:max(10px,env(safe-area-inset-left));padding:18px;margin:-18px}
-.ctl.right{right:max(10px,env(safe-area-inset-right))}
-.btn{position:relative;width:100px;height:100px;border-radius:50%;background:rgba(30,20,15,.32);border:3px solid rgba(255,255,255,.8);color:#fff;font:900 36px system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;text-shadow:0 2px 3px #0008;touch-action:none;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.ctl{touch-action:none;position:fixed;bottom:max(3px,env(safe-area-inset-bottom));display:none;gap:12px;z-index:5;align-items:flex-end}
+.ctl.left{left:max(4px,env(safe-area-inset-left));padding:18px;margin:-18px}
+.ctl.right{right:max(4px,env(safe-area-inset-right));gap:10px}
+.btn{position:relative;width:94px;height:94px;border-radius:50%;background:rgba(30,20,15,.32);border:3px solid rgba(255,255,255,.8);color:#fff;font:900 36px system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;text-shadow:0 2px 3px #0008;touch-action:none;box-shadow:0 4px 10px rgba(0,0,0,.25)}
 .btn::after{content:'';position:absolute;inset:-14px;border-radius:50%}
 .btn small{font-size:12px;letter-spacing:.5px;margin-top:-2px}
-.btn.big{width:122px;height:122px;font-size:44px;background:rgba(95,208,74,.5)}
+.btn.big{width:112px;height:112px;font-size:42px;background:rgba(95,208,74,.5)}
 .btn.goat{background:rgba(232,196,90,.5)}
-.btn.down{background:rgba(156,106,55,.8);animation:pulse .6s infinite alternate}
-.btn.up{background:rgba(61,143,214,.85);animation:pulse .6s infinite alternate}
+.btn.goat,.btn.down,.btn.up{width:66px;height:66px;font-size:22px;border-width:2.5px}
+.btn.goat small,.btn.down small,.btn.up small{font-size:8px;letter-spacing:0}
+.btn.goat::after,.btn.down::after,.btn.up::after{inset:-5px}
+.btn.down{background:rgba(156,106,55,.8)}
+.btn.up{background:rgba(61,143,214,.85)}
 .btn.on{background:rgba(255,255,255,.6);transform:scale(.94)}
 .btn.glow{background:rgba(255,210,63,.9);box-shadow:0 0 0 8px rgba(255,210,63,.55);animation:pulse .5s infinite alternate}
 @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
@@ -46,9 +49,9 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 @media (max-height:500px){
   .btn{width:80px;height:80px;font-size:28px;border-width:2.5px;background:rgba(30,20,15,.28);box-shadow:none}
   .btn.big{width:94px;height:94px;font-size:34px}
-  .btn.goat,.btn.down,.btn.up{width:76px;height:76px;font-size:24px}
+  .btn.goat,.btn.down,.btn.up{width:56px;height:56px;font-size:18px}
   .btn small{font-size:9px}
-  .ctl{gap:10px;bottom:max(4px,env(safe-area-inset-bottom))}
+  .ctl{gap:8px;bottom:max(2px,env(safe-area-inset-bottom))}
   .ctl.left{left:max(6px,env(safe-area-inset-left))}
   .ctl.right{right:max(6px,env(safe-area-inset-right))}
   #top button{font-size:16px;padding:3px 7px;min-width:40px;min-height:38px}}
@@ -64,7 +67,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.20';
+const VERSION='0.21';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -828,8 +831,9 @@ function climbCheck(){const cx=P.x+P.w/2,body=ladAt(cx,P.y+P.h-3)||ladAt(cx,P.y+
   if(!P.climb){if((body&&inp.up)||(top&&pressed('down'))){if(P.ride)endGooseRide(false);P.climb=true;P.x=Math.floor(cx/T)*T+16-P.w/2;P.vx=0;P.vy=0;P.buf=0;P.jumping=false;if(top)P.y+=8;
       if(!L.hinted.ladder){L.hinted.ladder=1;popText(isTouch?'Hold ⬆ to climb!':'Hold UP to climb!',cx,P.y-30,'#ffe9b8',true);}}else return false;}
   L.ladUp=false;P.vx=0;P.vy=0;P.onG=false;P.coy=0;
-  if(pressed('jump')&&!inp.up){P.climb=false;P.vy=-11;P.jumping=true;P.peakY=null;sfx('jump');return true;}
-  if(pressed('left')||pressed('right')){P.climb=false;P.face=inp.left?-1:1;P.vx=P.face*2.5;return true;}
+  const nearTop=()=>{const tx=Math.floor(cx/T);let ty=Math.floor((P.y+P.h-2)/T);while(ty>0&&tileAt(tx,ty-1)==='L')ty--;return P.y+P.h-ty*T<=26&&tileAt(tx,ty)==='L'?ty:null;};
+  if(pressed('jump')&&!inp.up){const tt=nearTop();P.climb=false;if(tt!=null)P.y=tt*T-P.h;P.vy=-14;P.jumping=false;P.peakY=null;P.vx=(inp.left?-1:inp.right?1:P.face)*3;sfx('jump');return true;}
+  if(pressed('left')||pressed('right')){const tt=nearTop();P.climb=false;P.face=inp.left?-1:1;if(tt!=null){P.y=tt*T-P.h;P.onG=true;}P.vx=P.face*3;return true;}
   const v=(inp.up?-3.4:0)+(inp.down?3.4:0);P.y+=v;if(v){P.anim+=.2;if(frame%14===0)sfx('talk');}
   const ft=P.y+P.h,tx=Math.floor(P.x+P.w/2)/T|0;
   if(v<0&&!ladAt(cx,ft-1)){P.y=(Math.floor((ft-1)/T)+1)*T-P.h;P.climb=false;P.onG=true;P.landT=0;P.buf=0;P.noJump=true;}
@@ -1060,7 +1064,6 @@ function titleButtons(){const b={start:{x:W/2-40,y:428,w:270,h:72},cont:{x:W/2+2
 function jumpRects(){const out=[];LEVELS.forEach((lv,l)=>{const n=lv.jumps.length,w=100,g=6,x0=W/2-(n*(w+g)-g)/2+20;lv.jumps.forEach((j,i)=>out.push({l,i,x:x0+i*(w+g),y:184+l*36,w,h:32}));});return out;}
 function testJump(l,i){store.set('check',null);startSong();loadLevel(l);const j=LV.jumps[i],x=j[1]*T,y=j[2];P.x=x;P.y=y-P.h;P.safe={x:P.x,y:P.y};L.check={x:Math.min(x,220*T)};L.runner=null;G.x=P.x-30;G.y=y-G.h;updCam(true);setState('play');}
 function stepTitle(){stopSong();if(!tap)return;
-  if(TEST)for(const r of jumpRects())if(inR(tap,r)){testJump(r.l,r.i);return;}
   for(const a of HEROARROWS())if(inR(tap,a)){pickHero(a.d);return;}
   for(const r of cardRects())if(inR(tap,r)){heroName=FAM[r.i].name;store.set('heroName',heroName);sfx('egg');return;}
   const b=titleButtons();
@@ -1143,8 +1146,7 @@ function drawTitle(){const gy=236;bgScreen(gy);fenceStrip(gy);groundStrip(gy);
   drawSpr(gooseSpr(frame%40<20?'stand':'walk1',false),22,50,90,gy,1,1.2,1.2);
   woodBoard(W/2-300,22,600,108);txt('Philalack Farms',W/2,78,64,'#fff3d6',OL,10);
   woodBoard(W/2-130,134,260,46);txt('Catch that cow!',W/2,158,22,'#fff3d6',OL,5);
-  if(TEST){for(const r of jumpRects()){button(r,'→ '+LEVELS[r.l].jumps[r.i][0],'#6a4fc4',false,14);if(r.i===0)txt('L'+(r.l+1),r.x-22,r.y+r.h/2,15,'#fff',OL,4);}}
-  else txt('Pick your player',W/2,250,20,'#fff',OL,5);
+  txt('Pick your player',W/2,250,20,'#fff',OL,5);
   for(const r of cardRects()){const p=FAM[r.i],on=p.name===heroName;rr(r.x,r.y,r.w,r.h,16);ctx.fillStyle=on?'#fff3c4':'rgba(255,248,234,.92)';ctx.fill();ctx.lineWidth=on?4:2.5;ctx.strokeStyle=on?'#ffb02e':OL;ctx.stroke();
     const fr=on?(Math.floor(frame/20)%2?'cheer':'stand'):'stand';drawSpr(heroSpr(p,fr,false),22,p.H+13,r.x+r.w/2,r.y+112,1,1.45,1.45);
     txt(p.name,r.x+r.w/2,r.y+126,17,OL);}
