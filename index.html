@@ -63,7 +63,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.13';
+const VERSION='0.15';
 /* =========================================================
    PHILALACK FARMS: Catch Waffles!
    Built on the Super Noah engine (physics, controls, audio).
@@ -676,17 +676,28 @@ function collectJunk(k,wx,wy){purse[k]=1;store.set('purse',purse);sfx('secret');
 function useDoor(d){sfx('door');flash=.8;const to=d.to;P.zone=to.zone;P.x=to.x-P.w/2;P.y=to.y-P.h;P.vx=0;P.vy=0;G.x=P.x-36;G.y=to.y-G.h;G.vy=0;L.doorLock=40;L.lockX=P.x;updCam(true);
   if(d.kind==='coopIn'){const first=!L.secrets.coop;L.secrets.coop=1;sfx('secret');confetti(P.x,P.y-20,40);if(first){showBanner('SECRET COOP!','The hens have been hiding eggs','#ff9fd6');L.showerAt=frame+80;}else startShower(false);}}
 
+function groundUnder(px,footY){const tx=Math.floor(px/T),ty=Math.floor((footY+4)/T);for(let y=ty;y<Math.min(ROWS,ty+3);y++){const c=tileAt(tx,y);if(solidC(c)||ONEWAY(c))return true;}return false;}
+// Buttons aims at the closest threat on either side; if nothing is near, he charges the way you face
+function goatAim(){const gx=P.x+P.w/2,gy=P.y+P.h;let best=null,bd=300;const cand=[];
+  for(const e of L.ents)if(e.alive&&!e.saddle)cand.push([e.x+e.w/2,e.y+e.h]);
+  if(L.chase==='on'&&!L.wf.hidden&&!P.mount)cand.push([L.wf.x+L.wf.w/2,L.wf.y+L.wf.h]);
+  if(P.zone===0&&L.g[13][127]==='B')cand.push([128*T,GY]);
+  for(const [x,y] of cand){const d=Math.abs(x-gx);if(d<bd&&Math.abs(y-gy)<100){bd=d;best=x;}}
+  return best==null?P.face:(best<gx?-1:1);}
 function stepGoat(){
-  if(pressed('butt')&&G.mode==='walk'&&!P.mount){G.mode='dash';G.dt=34;G.face=P.face;G.x=P.x+P.w/2-G.w/2;G.y=P.y+P.h-G.h;G.vy=0;sfx('butt');popText('HEADBUTT!',G.x+G.w/2,G.y-26,'#ffe9b8');}
+  if(pressed('butt')&&G.mode==='walk'&&!P.mount){G.mode='dash';G.dt=34;G.face=goatAim();G.x=P.x+P.w/2-G.w/2;G.y=P.y+P.h-G.h;G.vy=0;sfx('butt');popText('HEADBUTT!',G.x+G.w/2,G.y-26,'#ffe9b8');}
   if(G.mode==='dash'){G.vx=G.face*9;G.vy=Math.min(G.vy+.6,12);moveX(G);moveY(G);
     if(frame%2===0)parts.push({kind:'dust',x:G.x+G.w/2-G.face*14,y:G.y+G.h,vx:-G.face,vy:-.4,life:16});
     if(G.hitW&&G.hitTile&&tileAt(G.hitTile.tx,G.hitTile.ty)==='B')breakHay(G.hitTile.tx,G.hitTile.ty);
     if(--G.dt<=0||G.hitW||G.y>ROWS*T){if(G.hitW){sfx('bump');burst(G.x+G.w/2+G.face*14,G.y+10,'#fff',5,'star');}G.mode='walk';}}
-  else{const tx=P.x+P.w/2-P.face*34-G.w/2,dx=tx-G.x;
+  else{const foot=P.y+P.h;let tx=P.x+P.w/2-P.face*34-G.w/2;
+    // never stand over a hole: if the spot behind you has no ground, stand right next to you instead
+    if(P.onG&&!groundUnder(tx+G.w/2,foot))tx=P.x+P.w/2-G.w/2;
+    const dx=tx-G.x;
     if(Math.abs(dx)>6){G.vx=Math.max(-9,Math.min(9,dx*.14));G.face=Math.sign(G.vx)||G.face;}else{G.vx*=.7;if(Math.abs(G.vx)<.2)G.face=P.face;}
     G.vy=Math.min(G.vy+.7,13);moveX(G);if(G.hitW&&G.onG)G.vy=-11;moveY(G);
-    if(G.onG&&Math.abs(G.vx)>1){const ax=G.vx>0?G.x+G.w+4:G.x-4;if(!solidAt(Math.floor(ax/T),Math.floor((G.y+G.h+4)/T))&&!ONEWAY(tileAt(Math.floor(ax/T),Math.floor((G.y+G.h+4)/T))))G.vy=-11;}
-    if(Math.hypot(G.x-P.x,G.y-P.y)>320||G.y>ROWS*T){G.x=P.x-P.face*30;G.y=P.y+P.h-G.h;G.vy=0;burst(G.x+G.w/2,G.y+G.h/2,'#fff',6);}}
+    if(G.onG&&Math.abs(G.vx)>1&&Math.abs(dx)>40){const ax=G.vx>0?G.x+G.w+4:G.x-4;if(!groundUnder(ax,G.y+G.h))G.vy=-12;}
+    if(G.y>ROWS*T||Math.hypot(G.x-P.x,G.y-P.y)>360){const sp=P.safe||{x:P.x,y:P.y};G.x=sp.x+P.w/2-G.w/2;G.y=sp.y+P.h-G.h;G.vx=0;G.vy=0;if(frame-(G.lastPop||-999)>90){burst(G.x+G.w/2,G.y+G.h/2,'#fff',6);G.lastPop=frame;}}}
   G.anim+=Math.max(.15,Math.abs(G.vx)*.09);}
 
 function stepPlay(){
@@ -871,8 +882,8 @@ function step(){frame++;stateT++;tickSong();
 
 /* ---------------- title screen ---------------- */
 function cardRects(){const cw=112,gap=8,tot=7*cw+6*gap,x0=W/2-tot/2;return FAM.map((p,i)=>({i,x:x0+i*(cw+gap),y:262,w:cw,h:142}));}
-function titleButtons(){const hasSave=!!store.get('check',null)||(store.get('cleared',[])||[]).length>0;
-  const b={start:{x:W/2-40,y:428,w:hasSave?232:440,h:72}};if(hasSave)b.cont={x:W/2+204,y:428,w:200,h:72};
+function titleButtons(){const hasSave=!!store.get('check',null);
+  const b={start:{x:W/2-40,y:428,w:hasSave?290:440,h:72}};if(hasSave)b.cont={x:W/2+262,y:436,w:142,h:56};
   b.modes=[['e','Easy','#ff7ab8'],['n','Normal','#5fb648'],['h','Hard','#e0413a']].map((m,i)=>({m:m[0],lab:m[1],col:m[2],x:W/2-404+i*112,y:448,w:104,h:46}));return b;}
 function stepTitle(){stopSong();if(!tap)return;
   for(const r of cardRects())if(inR(tap,r)){heroName=FAM[r.i].name;store.set('heroName',heroName);sfx('egg');return;}
@@ -908,7 +919,8 @@ function drawTitle(){const gy=236;bgScreen(gy);fenceStrip(gy);groundStrip(gy);
   for(const r of cardRects()){const p=FAM[r.i],on=p.name===heroName;rr(r.x,r.y,r.w,r.h,16);ctx.fillStyle=on?'#fff3c4':'rgba(255,248,234,.92)';ctx.fill();ctx.lineWidth=on?4:2.5;ctx.strokeStyle=on?'#ffb02e':OL;ctx.stroke();
     const fr=on?(Math.floor(frame/20)%2?'cheer':'stand'):'stand';drawSpr(heroSpr(p,fr,false),22,p.H+13,r.x+r.w/2,r.y+112,1,1.45,1.45);
     txt(p.name,r.x+r.w/2,r.y+126,17,OL);}
-  const b=titleButtons();button(b.start,b.cont?'New game':'▶ Start','#e0413a',false,30);if(b.cont)button(b.cont,'Continue','#3d8fd6',false,28);
+  const b=titleButtons();const pu=1+Math.sin(frame*.1)*.025;ctx.save();ctx.translate(b.start.x+b.start.w/2,b.start.y+b.start.h/2);ctx.scale(pu,pu);ctx.translate(-b.start.x-b.start.w/2,-b.start.y-b.start.h/2);button(b.start,'▶ Play','#e0413a',false,34);ctx.restore();
+  if(b.cont){button(b.cont,'Resume','#8a7f74',false,20);txt('at last scarecrow',b.cont.x+b.cont.w/2,b.cont.y+b.cont.h+12,12,'#fff',OL,3);}
   txt('Difficulty',W/2-238,432,14,'#fff',OL,4);for(const m of b.modes)button(m,m.lab,MODE===m.m?m.col:'#a99a8c',MODE===m.m,17);
   txt('v'+VERSION,12,H-12,13,'#fff',OL,3,'left');{const n=purseCount();if(n)txt('👜 Mom’s purse: '+n+' of '+PURSE_ITEMS.length,W-16,H-14,14,'#ffd6ea',OL,4,'right');}}
 
