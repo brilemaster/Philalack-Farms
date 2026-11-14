@@ -54,9 +54,9 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
   .btn.big{width:86px;height:86px;font-size:32px}
   .btn.goat,.btn.down,.btn.up{width:52px;height:52px;font-size:17px}
   .btn small{font-size:8px}
-  .ctl{gap:6px;bottom:max(0px,calc(env(safe-area-inset-bottom) - 18px))}
-  .ctl.left{left:max(2px,calc(env(safe-area-inset-left) - 34px))}
-  .ctl.right{right:max(2px,calc(env(safe-area-inset-right) - 34px));gap:6px}
+  .ctl{gap:8px;bottom:calc(env(safe-area-inset-bottom) + 12px)}
+  .ctl.left{left:calc(env(safe-area-inset-left) + 14px)}
+  .ctl.right{right:calc(env(safe-area-inset-right) + 14px);gap:8px}
   #top button{font-size:16px;padding:3px 7px;min-width:40px;min-height:38px}}
 </style>
 </head>
@@ -70,7 +70,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.31';
+const VERSION='0.32';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -109,22 +109,36 @@ addEventListener('keydown',e=>{if(e.code==='ArrowUp'||e.code==='KeyW')inp.up=tru
 const latch={};let tapN=0;
 function pressed(k){return (inp[k]&&!prevInp[k])||!!latch[k];}
 const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
-const ctlEls=[...document.querySelectorAll('.ctl')];let ctlShown=false;
+const ctlEls=[...document.querySelectorAll('.ctl')];let ctlShown=false;const TOUCHCTL='ontouchstart' in window;
 function syncCtl(){const show=isTouch&&state==='play'&&!gamePaused&&!(typeof purseOpen!=='undefined'&&purseOpen);if(show!==ctlShown){ctlShown=show;ctlEls.forEach(el=>el.style.display=show?'flex':'none');
   if(!show){if(window.__lpClear)__lpClear();for(const k in inp)inp[k]=false;document.querySelectorAll('.btn').forEach(b=>b.classList.remove('on'));}}}
 {const lc=document.getElementById('leftCtl'),bL=lc.querySelector('[data-k=left]'),bR=lc.querySelector('[data-k=right]'),lp=new Map();
   const upd=()=>{let l=false,r=false;for(const d of lp.values()){if(d==='left')l=true;else r=true;}inp.left=l;inp.right=r;bL.classList.toggle('on',l);bR.classList.toggle('on',r);};
   const dir=x=>{const a=bL.getBoundingClientRect(),b=bR.getBoundingClientRect();return x<(a.right+b.left)/2?'left':'right';};
-  lc.addEventListener('pointerdown',e=>{e.preventDefault();try{lc.setPointerCapture(e.pointerId);}catch(_){}lp.set(e.pointerId,dir(e.clientX));upd();});
+  lc.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&TOUCHCTL)return;e.preventDefault();try{lc.setPointerCapture(e.pointerId);}catch(_){}lp.set(e.pointerId,dir(e.clientX));upd();});
   lc.addEventListener('pointermove',e=>{if(!lp.has(e.pointerId))return;e.preventDefault();lp.set(e.pointerId,dir(e.clientX));upd();});
   ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>lc.addEventListener(ev,e=>{if(lp.delete(e.pointerId))upd();}));
   window.__lpClear=()=>{lp.clear();};}
 document.querySelectorAll('.btn').forEach(b=>{const k=b.dataset.k;if(k==='left'||k==='right')return;
-  const on=e=>{e.preventDefault();if(k==='jump'){userGo('key');tapN++;}latch[k]=1;inp[k]=true;b.classList.add('on');try{b.setPointerCapture(e.pointerId);}catch(_){}};
-  const off=e=>{e.preventDefault();inp[k]=false;b.classList.remove('on');};
+  const on=e=>{if(e.pointerType==='touch'&&TOUCHCTL)return;e.preventDefault();if(k==='jump'){userGo('key');tapN++;}latch[k]=1;inp[k]=true;b.classList.add('on');try{b.setPointerCapture(e.pointerId);}catch(_){}};
+  const off=e=>{if(e.pointerType==='touch'&&TOUCHCTL)return;e.preventDefault();inp[k]=false;b.classList.remove('on');};
   b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('lostpointercapture',off);
   b.addEventListener('contextmenu',e=>e.preventDefault());});
 let tap=null;
+// Touch controls: every finger on screen is checked against the buttons on every touch event.
+// This is the most reliable way on iPhone/iPad (Safari, Chrome, Brave all use the same engine there),
+// and it stops two-thumb play from being mistaken for a pinch or swipe.
+if(TOUCHCTL){const lc=document.getElementById('leftCtl'),bL=lc.querySelector('[data-k=left]'),bR=lc.querySelector('[data-k=right]');
+  const others=[...document.querySelectorAll('.btn')].filter(b=>b.dataset.k!=='left'&&b.dataset.k!=='right');
+  const inRect=(x,y,r,m)=>x>=r.left-m&&x<=r.right+m&&y>=r.top-m&&y<=r.bottom+m;
+  const keyAt=(x,y)=>{const lr=lc.getBoundingClientRect();if(lc.style.display!=='none'&&inRect(x,y,lr,8)){const a=bL.getBoundingClientRect(),b=bR.getBoundingClientRect();return x<(a.right+b.left)/2?'left':'right';}
+    let best=null,bd=1e9;for(const b of others){if(!b.offsetParent)continue;const r=b.getBoundingClientRect();if(!inRect(x,y,r,12))continue;const d=Math.hypot(x-(r.left+r.right)/2,y-(r.top+r.bottom)/2);if(d<bd){bd=d;best=b.dataset.k;}}return best;};
+  const btnOf=k=>k==='left'?bL:k==='right'?bR:others.find(b=>b.dataset.k===k);
+  const handle=e=>{if(!ctlShown)return;if(e.target.closest&&e.target.closest('#top,#pm,#purse'))return;e.preventDefault();
+    const held={};for(const t of e.touches){const k=keyAt(t.clientX,t.clientY);if(k)held[k]=true;}
+    for(const k of ['left','right','jump','butt','down','up']){const now=!!held[k];if(now&&!inp[k]){latch[k]=1;if(k==='jump'){tapN++;userGo('key');}}inp[k]=now;const b=btnOf(k);if(b)b.classList.toggle('on',now);}};
+  ['touchstart','touchmove','touchend','touchcancel'].forEach(ev=>document.addEventListener(ev,handle,{passive:false}));
+  document.addEventListener('gesturestart',e=>e.preventDefault());}
 cv.addEventListener('pointerdown',e=>{e.preventDefault();const r=cv.getBoundingClientRect();tap={x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};userGo('tap');});
 const inR=(p,r)=>p&&r&&p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h;
 
@@ -582,20 +596,20 @@ function buildW1(){
   // main farm path
   ground(0,26);ground(30,58);ground(62,140);ground(144,176);ground(181,255);
   sign(3,'Catch Waffles!');eggs(6,13,5);
-  g[10][12]='X';g[10][13]='M';g[10][14]='Q';eggs(12,8,3);
-  g[10][18]='I';b.hints.push({x:18*T+16,y:10*T+16,kind:'sparkle'});
+  g[11][12]='X';g[11][13]='M';g[11][14]='Q';eggs(12,9,3);
+  g[11][18]='I';b.hints.push({x:18*T+16,y:11*T+16,kind:'sparkle'});
   goose(22);arc(24,12,7,2.6);
   sign(31,'Headbutt geese!');
   block(36,38,12);block(39,41,11);eggs(36,11,3);eggs(39,10,3);goose(46);goose(52);arc(56,12,7,2.6);
   // goose-ride runway
   sign(63,'Ride a goose!');goose(67,{saddle:true,vx:-.5});
-  arc(66,7,12,3);plank(74,77,9);eggs(74,8,4);gold(79,4,0);g[10][70]='X';g[10][71]='R';
+  arc(66,7,12,3);plank(74,77,9);eggs(74,8,4);gold(79,4,0);g[11][70]='X';g[11][71]='R';
   // Dill's tunnel
   sign(81,'Dill’s burrow');
   b.burrows.push({x:84*T+16,y:GY,kind:'tunnel',ex:106*T+16,dug:0,junk:[{x:88*T,kind:'boot'},{x:91*T,kind:'remote'},{x:94*T,kind:'keys'},{x:98*T,kind:'bone'},{x:102*T,kind:'coin'}]});
   block(88,89,12);block(90,92,9);eggs(90,8,3);goose(97);goose(101);
   b.checks.push({x:110*T,on:false});
-  eggs(113,13,6);g[10][118]='X';g[10][119]='M';g[10][120]='X';
+  eggs(113,13,6);g[11][118]='X';g[11][119]='M';g[11][120]='X';
   // the secret chicken coop, hidden behind loose hay
   b.decor.push({kind:'coop',x:124*T,y:GY});block(126,129,11,'B');
   b.doors.push({x:127*T,y:12*T,w:64,h:64,to:{zone:1,x:261*T,y:GY},need:{x:127,y:13},secret:'coop',title:'SECRET COOP!',sub:'The hens have been hiding eggs'});
@@ -603,13 +617,13 @@ function buildW1(){
   for(const [x,s] of [[108,1],[112,0],[116,1],[122,1],[134,0],[137,1]])b.decor.push({kind:'pumpkin',x:x*T+16,smashed:!!s});
   b.spawners.push({x:139*T,y:GY-26,cd:40});arc(139,12,6,2.6);
   // planks
-  plank(150,153,10);plank(156,159,7);eggs(150,9,4);eggs(156,6,4);g[10][164]='X';g[10][165]='M';goose(162);goose(170);
+  plank(150,153,10);plank(156,159,7);eggs(150,9,4);eggs(156,6,4);g[11][164]='X';g[11][165]='M';goose(162);goose(170);
   b.spawners.push({x:174*T,y:GY-26,cd:80});arc(175,12,7,2.8);
   // second goose ride, and a secret burrow up high
   goose(186,{saddle:true,vx:-.5});arc(188,8,10,3);
   plank(195,197,11);plank(200,204,8);eggs(195,10,3);
   b.burrows.push({x:202*T+16,y:8*T,kind:'room',to:{zone:2,x:299*T,y:GY},secret:'cave',title:'SECRET CAVE!',sub:'Dill found a treasure cave'});
-  g[10][210]='I';b.hints.push({x:210*T+16,y:10*T+16,kind:'sparkle'});eggs(205,13,8);goose(214);
+  g[11][210]='I';b.hints.push({x:210*T+16,y:11*T+16,kind:'sparkle'});eggs(205,13,8);goose(214);
   sign(220,'Waffles’ pen!');
   // the pen (rodeo arena)
   fill(255,255,0,13,'F');plank(230,234,10,'-');plank(246,250,10,'-');
@@ -648,15 +662,15 @@ function buildW2(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank}=kit(124,'
   const lad=(x,r1,r2)=>fill(x,x,r1,r2,'L');
   lad(32,40,45);lad(5,22,27);lad(3,12,16);
   // GROUND FLOOR: the ladder up is hidden behind loose hay
-  sign(2,'Hayloft Heights');eggs(4,62,5);g[59][5]='X';g[59][6]='M';g[59][7]='Q';eggs(5,57,3);goose(10,{row:63});
+  sign(2,'Hayloft Heights');eggs(4,62,5);g[60][5]='X';g[60][6]='M';g[60][7]='Q';eggs(5,58,3);goose(10,{row:63});
   fill(15,21,58,62,'B');b.reveal=[];for(let r=52;r<=62;r++)b.reveal.push([18,r,'L']);b.decor.push({kind:'ladderhint',x:18*T,y1:52*T,y2:63*T});
   b.hints.push({x:15*T,y:58*T,kind:'hen',need:{x:18,y:62},crack:{x:18,y:61},t1:'Psst! The ladder is behind this hay…',t2:'Headbutt it with 🐐!'});
   b.burrows.push({x:23*T+16,y:GY,kind:'tunnel',ex:34*T+16,dug:0,junk:[{x:26*T,kind:'sock'},{x:29*T,kind:'spatula'},{x:32*T,kind:'earbuds'}]});
   g[62][30]='J';for(let y=56;y<=60;y++)egg(30,y);g[54][30]='I';b.hints.push({x:30*T+16,y:54*T+16,kind:'sparkle'});
   // LOFT 1
-  b.checks.push({x:20*T,y:52*T,on:false});fill(4,6,49,51,'H');g[48][10]='X';g[48][11]='R';g[48][12]='X';eggs(22,51,8);goose(26,{row:52});eggs(4,48,3);
+  b.checks.push({x:20*T,y:52*T,on:false});fill(4,6,49,51,'H');g[49][10]='X';g[49][11]='R';g[49][12]='X';eggs(22,51,8);goose(26,{row:52});eggs(4,48,3);
   // LOFT 2: rolling hay comes from the right; ladder up on the right
-  eggs(9,45,7);g[42][20]='X';g[42][21]='M';g[42][22]='X';goose(14,{row:46});b.spawners.push({x:35*T,y:46*T-30,cd:60,t:'bale'});for(let y=41;y<=44;y++)egg(33,y);
+  eggs(9,45,7);g[43][20]='X';g[43][21]='M';g[43][22]='X';goose(14,{row:46});b.spawners.push({x:35*T,y:46*T-30,cd:60,t:'bale'});for(let y=41;y<=44;y++)egg(33,y);
   // LOFT 3: a springy bale up through the left opening
   g[39][5]='J';for(let y=35;y<=37;y++)egg(5,y);eggs(12,39,8);goose(16,{row:40});
   // LOFT 4: Dill's burrow to the grain bin, and a gap to hop
@@ -668,7 +682,7 @@ function buildW2(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank}=kit(124,'
   b.hints.push({x:1*T-16,y:25*T,kind:'hen',need:{x:2,y:27},crack:{x:2,y:26},t1:'Psst! There’s a door behind this hay…',t2:'Headbutt it with 🐐!'});
   gold(17,25,0);eggs(8,27,6);arc(23,26,4,1);goose(12,{row:28});b.spawners.push({x:35*T,y:28*T-30,cd:90,t:'bale'});
   // LOFT 6: springy bale up through the right opening
-  g[21][32]='J';eggs(9,21,7);g[18][12]='X';g[18][13]='Q';g[18][14]='X';arc(22,20,6,1.5);goose(16,{row:22});for(let y=15;y<=19;y++)egg(32,y);
+  g[21][32]='J';eggs(9,21,7);g[19][12]='X';g[19][13]='Q';g[19][14]='X';arc(22,20,6,1.5);goose(16,{row:22});for(let y=15;y<=19;y++)egg(32,y);
   // LOFT 7: the last stretch, then the ladder up to the hay ring
   b.checks.push({x:22*T,y:17*T,on:false});eggs(10,16,16);goose(14,{row:17});sign(6,'Hay ring ⬆',17);
   // THE HAY RING (rodeo arena) at the very top
@@ -692,7 +706,7 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   const rock=(x,top)=>fill(x,x+1,top,ROWS-1,'C');
   const log=(x0,x1,sp)=>b.logs.push({x:x0*T,x0:x0*T,x1:x1*T,y:GY+2,w:96,h:16,vx:sp||1.1});
   const fish=(x,w)=>b.ents.push(E('fish',x*T,GY+40,26,16,{wait:w||60,hide:true}));
-  ground(0,20);sign(2,'Creek Crossing');eggs(5,13,4);g[10][9]='X';g[10][10]='M';g[10][11]='Q';eggs(9,8,3);goose(16);
+  ground(0,20);sign(2,'Creek Crossing');eggs(5,13,4);g[11][9]='X';g[11][10]='M';g[11][11]='Q';eggs(9,9,3);goose(16);
   // first creek: hop the rock
   rock(23,12);arc(21,11,6,2);
   ground(27,50);sign(28,'Dill’s burrow');
@@ -700,10 +714,10 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   block(36,37,12,'C');eggs(36,11,2);goose(44);
   // ride a floating log across
   log(51,63,1.1);fish(57,40);arc(52,10,10,2.5);
-  ground(63,80);b.checks.push({x:66*T,on:false});g[10][70]='X';g[10][71]='R';eggs(70,8,2);goose(74,{saddle:true,vx:-.5});eggs(76,13,4);
+  ground(63,80);b.checks.push({x:66*T,on:false});g[11][70]='X';g[11][71]='R';eggs(70,9,2);goose(74,{saddle:true,vx:-.5});eggs(76,13,4);
   // the wide river: ride the goose, or hop log to log
   log(81,91,1.3);log(90,101,-1.2);fish(86,20);fish(95,100);arc(82,8,18,3);gold(91,4,0);
-  ground(101,120);eggs(104,13,6);goose(110);goose(116);g[10][113]='I';b.hints.push({x:113*T+16,y:10*T+16,kind:'sparkle'});
+  ground(101,120);eggs(104,13,6);goose(110);goose(116);g[11][113]='I';b.hints.push({x:113*T+16,y:11*T+16,kind:'sparkle'});
   // stepping stones
   rock(122,12);rock(125,11);rock(128,12);eggs(122,10,2);eggs(125,9,2);eggs(128,10,2);fish(124,70);
   ground(130,160);
@@ -717,7 +731,7 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   // a rocky hill with Dill's secret burrow on top
   block(182,183,12,'C');block(185,186,10,'C');plank(187,192,8);eggs(187,7,3);
   b.burrows.push({x:190*T+16,y:8*T,kind:'room',to:{zone:2,x:384*T,y:GY},secret:'shack',calm:true,title:'SECRET FISHING SHACK!',sub:'Nice and quiet in here…'});
-  goose(198);goose(204);eggs(196,13,6);g[10][200]='X';g[10][201]='M';sign(208,'Waffles!');
+  goose(198);goose(204);eggs(196,13,6);g[11][200]='X';g[11][201]='M';sign(208,'Waffles!');
   // THE RAFT CHASE: the screen scrolls; keep up across rocks, islands and logs
   rock(216,13);rock(219,13);rock(222,13);rock(225,13);rock(228,13);ground(231,235);rock(238,13);log(240,250,1.2);ground(251,254);
   rock(257,13);rock(260,13);rock(263,13);log(265,276,1.3);ground(277,281);
