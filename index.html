@@ -64,7 +64,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
   .btn.big{width:86px;height:86px;font-size:32px}
   .btn.goat,.btn.down,.btn.up{width:52px;height:52px;font-size:17px}
   .btn small{font-size:8px}
-  .ctl{gap:8px;bottom:calc(env(safe-area-inset-bottom) + 12px)}
+  .ctl{gap:8px;bottom:calc(env(safe-area-inset-bottom) * .35 + 4px)}
   .ctl.left{left:calc(env(safe-area-inset-left) + 14px)}
   .ctl.right{right:calc(env(safe-area-inset-right) + 14px);gap:8px}
   #top button{font-size:16px;padding:3px 7px;min-width:40px;min-height:38px}}
@@ -80,7 +80,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.55';
+const VERSION='0.56';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -955,7 +955,7 @@ LEVELS.push({name:'Corn Maze',build:buildW4,floor:'#',rows:17,gy:14,arenaRow:14,
    intro:()=>INTRO4,introId:'intro4',introLevel:true,penStory:[],penId:'pen5',escStory:[],
    clearLine:'Henry burst out of the corn… and he’s running for the smokehouse!'});
 LEVELS.push({name:'Smokehouse Showdown',build:buildW5,floor:'#',rows:17,gy:14,arenaRow:14,
-   zones:[{x0:0,x1:300*T,kind:'dusk'},{x0:302*T,x1:338*T,kind:'shack'},{x0:340*T,x1:378*T,kind:'cave'}],
+   duck:true,zones:[{x0:0,x1:300*T,kind:'dusk'},{x0:302*T,x1:338*T,kind:'shack'},{x0:340*T,x1:378*T,kind:'cave'}],
    arena:[260,290],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,ufoX:268,henryX:279,
    jumps:[['Start',3,14*T],['Smoke',24,14*T],['Cellar',108,14*T],['House',166,14*T],['Yard',246,14*T]],
    intro:()=>INTRO5,introId:'intro5',introLevel:true,penStory:[],penId:'pen6',escStory:[],
@@ -963,7 +963,7 @@ LEVELS.push({name:'Smokehouse Showdown',build:buildW5,floor:'#',rows:17,gy:14,ar
      {who:'Jake',text:'Hold on. I’m getting this on video.'},{who:'Nolan',text:'Can we keep the UFO instead?'},{who:'Lylah',text:'Bye bye, moo moo!'},{who:'Henry',text:'MOOOOO! (See you in space, losers!)'},
      {who:'Narrator',text:'Henry is headed for outer space. Looks like this family needs a rocket.'},{who:'Logan',text:'DIBS on the window seat!'}],
    clearLine:'Henry got beamed up by a UFO… next stop: OUTER SPACE!'});
-LEVELS.push({name:'Launch Pad',build:buildW6,floor:'#',rows:17,gy:14,arenaRow:14,night:true,needParts:true,
+LEVELS.push({name:'Launch Pad',build:buildW6,floor:'#',rows:17,gy:14,arenaRow:14,night:true,needParts:true,duck:true,
    zones:[{x0:0,x1:320*T,kind:'farmnight'},{x0:322*T,x1:358*T,kind:'shack'},{x0:360*T,x1:396*T,kind:'cave'}],
    arena:[280,300],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:294,
    jumps:[['Start',3,14*T],['Tower',33,14*T],['Barn',125,14*T],['Scaffold',194,14*T],['Pad',270,14*T]],
@@ -1540,7 +1540,7 @@ function step(){frame++;stateT++;tickSong();
 /* ---------------- title screen ---------------- */
 const SHOWX=()=>W/2-175,HORIZ=350;
 function cardRects(){const cw=58,gap=8,tot=7*cw+6*gap,x0=W/2-tot/2;return FAM.map((p,i)=>({i,x:x0+i*(cw+gap),y:366,w:cw,h:58}));}
-const HEROARROWS=()=>[{x:SHOWX()-168,y:214,w:64,h:64,d:-1},{x:SHOWX()+104,y:214,w:64,h:64,d:1}];
+const HEROARROWS=()=>[{x:14,y:H-96,w:84,h:84,d:-1},{x:W-98,y:H-96,w:84,h:84,d:1}];
 function pickHero(d){const i=FAM.findIndex(p=>p.name===heroName);heroName=FAM[(i+d+FAM.length)%FAM.length].name;store.set('heroName',heroName);sfx('egg');}
 function titleButtons(){const b={start:{x:W/2-252,y:446,w:290,h:64},cont:{x:W/2+56,y:446,w:196,h:64}};
   b.modes=[['e','EASY','#3fe0a0'],['n','NORMAL','#ffc53d'],['h','HARD','#ff3d6e']].map((m,i)=>({m:m[0],lab:m[1],col:m[2],x:W/2+18+i*108,y:300,w:100,h:40}));return b;}
@@ -1670,7 +1670,7 @@ function drawTitle(){const hz=HORIZ;
   {const sg=ctx.createRadialGradient(sx,fy,4,sx,fy,110);sg.addColorStop(0,'rgba(18,198,217,.65)');sg.addColorStop(1,'rgba(18,198,217,0)');ctx.fillStyle=sg;ctx.save();ctx.translate(sx,fy);ctx.scale(1,.28);ctx.beginPath();ctx.arc(0,0,110,0,7);ctx.fill();ctx.restore();
    ctx.fillStyle='rgba(18,198,217,.08)';ctx.beginPath();ctx.moveTo(sx-26,150);ctx.lineTo(sx+26,150);ctx.lineTo(sx+100,fy);ctx.lineTo(sx-100,fy);ctx.fill();
    const sc=Math.min(3.1,178/(hp.H+13)),bob=Math.round(Math.sin(frame*.08)*2);drawSpr(heroSpr(hp,Math.floor(frame/24)%3===2?'cheer':'stand',false),22,hp.H+13,sx,fy+bob*0,1,sc,sc);}
-  for(const a of HEROARROWS()){const cx=a.x+a.w/2,cy=a.y+a.h/2,d=a.d,pu=Math.sin(frame*.12)*3*d;ctx.beginPath();ctx.moveTo(cx+d*16+pu,cy);ctx.lineTo(cx-d*12+pu,cy-20);ctx.lineTo(cx-d*12+pu,cy+20);ctx.closePath();ctx.fillStyle='#12c6d9';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#12081f';ctx.stroke();}
+  for(const a of HEROARROWS()){const cx=a.x+a.w/2,cy=a.y+a.h/2,d=a.d,pu=Math.sin(frame*.12)*3*d;ctx.beginPath();ctx.arc(cx,cy,a.w/2,0,7);ctx.fillStyle='rgba(16,8,34,.7)';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='rgba(18,198,217,.8)';ctx.stroke();ctx.beginPath();ctx.moveTo(cx+d*18+pu,cy);ctx.lineTo(cx-d*12+pu,cy-20);ctx.lineTo(cx-d*12+pu,cy+20);ctx.closePath();ctx.fillStyle='#12c6d9';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#12081f';ctx.stroke();}
   // name plate
   {const x0=W/2+18;txt('PLAYER 1',x0,182,15,'#12c6d9','#12081f',4,'left');const nm=hp.name.toUpperCase();txt(nm,x0,226,fitSz(nm,56,330),'#fff','#12081f',8,'left');
    txt(HERO_TAG[hp.name]||'',x0+2,266,20,'#ffc53d','#12081f',5,'left');txt('DIFFICULTY',x0,290,13,'rgba(255,255,255,.7)','#12081f',3,'left');}
@@ -1682,7 +1682,7 @@ function drawTitle(){const hz=HORIZ;
   // buttons
   {const pu=1+Math.sin(frame*.12)*.03;ctx.save();ctx.translate(b.start.x+b.start.w/2,b.start.y+b.start.h/2);ctx.scale(pu,pu);ctx.translate(-b.start.x-b.start.w/2,-b.start.y-b.start.h/2);neoBtn(b.start,'▶ NEW GAME','#ff3d6e',false,30,true);ctx.restore();}
   {const ri=resumeInfo();neoBtn(b.cont,'MAP','#12c6d9',false,28,true);txt('LEFT OFF: LEVEL '+(ri.w+1)+(ri.ck?' · SCARECROW':''),b.cont.x+b.cont.w/2,b.cont.y+b.cont.h+14,12,'rgba(255,255,255,.75)','#12081f',3);}
-  txt('v'+VERSION,12,H-12,12,'rgba(255,255,255,.55)',null,0,'left');{const n=purseCount();if(n)txt('👜 MOM’S PURSE: '+n+'/'+PURSE_ITEMS.length,W-16,H-14,13,'#ffc53d','#12081f',4,'right');}
+  txt('v'+VERSION,12,14,12,'rgba(255,255,255,.45)',null,0,'left');
   ctx.fillStyle=scanPat();ctx.fillRect(0,0,W,H);}
 
 /* ---------------- story scenes ---------------- */
@@ -1819,7 +1819,7 @@ function drawParts(screen){for(const p of parts){if(!!p.screen!==!!screen)contin
   else if(p.kind==='hat')ctx.drawImage(HATI,p.x-14,p.y-9,28,18);
   else if(p.kind==='flygoose')drawSpr(gooseSpr(frame%8<4?'flap':'stand',true),22,50,p.x,p.y,p.face,1.2,1.2);
   else{ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4);}}ctx.globalAlpha=1;}
-function drawLevelExtras(){if(LV.needParts&&!L.launch){const x=W-226,y=68,n=partCount(),pp=L.partPop>0?L.partPop--:0;rr(x,y,212,40,12);ctx.fillStyle='rgba(12,8,30,.72)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=n>=5?'#7dff8a':'rgba(18,198,217,.8)';ctx.stroke();
+function drawLevelExtras(){if(LV.needParts&&!L.launch&&P.zone===0){const x=W/2-106,y=10,n=partCount(),pp=L.partPop>0?L.partPop--:0;rr(x,y,212,40,12);ctx.fillStyle='rgba(12,8,30,.72)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=n>=5?'#7dff8a':'rgba(18,198,217,.8)';ctx.stroke();
     PART_ORDER.forEach((k,i)=>{const got=!!L.parts[k];ctx.globalAlpha=got?1:.25;const sc=got&&pp&&i===PART_ORDER.indexOf(Object.keys(L.parts).slice(-1)[0])?1+pp/40*.5:1;ctx.drawImage(PARTS[k],x+12+i*39-14*(sc-1),y+6-14*(sc-1),28*sc,28*sc);});ctx.globalAlpha=1;}
   if(L.callout&&L.callout.t>0){const c=L.callout;c.t--;const al=Math.min(1,c.t/20),who=speaker(c.who);ctx.globalAlpha=al;ctx.font=`${FW} 17px ${FONT}`;const tw=Math.min(W-80,ctx.measureText(c.text).width+40),bx=W/2-tw/2,by=H-140;
     rr(bx,by,tw,40,10);ctx.fillStyle='rgba(12,8,30,.85)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffc53d';ctx.stroke();txt(c.text,W/2,by+21,fitSz(c.text,17,tw-30),'#fff');
@@ -1958,8 +1958,8 @@ document.getElementById('purseB').onclick=e=>{e.stopPropagation();unlockAudio();
 document.getElementById('purseX').onclick=()=>closePurse();
 updPurseBadge();
 let upShown=false;function syncUp(){const want=isTouch&&state==='play'&&!gamePaused&&!!(L&&(L.ladUp||P.climb));if(want!==upShown){upShown=want;const b=document.getElementById('upBtn');b.style.display=want?'flex':'none';if(!want){inp.up=false;b.classList.remove('on');}}}
-let downShown=false,downLab='';function syncDown(){syncUp();const duck=!!(L&&LV&&!(L.near||L.ladDown||P.climb));const lab=duck?'DUCK':'DOWN';if(lab!==downLab){downLab=lab;const b=document.getElementById('downBtn');if(b)b.innerHTML='▼<small>'+lab+'</small>';}
-  const want=isTouch&&state==='play'&&!gamePaused&&!!(L&&!L.chase&&!L.abduct);if(want!==downShown){downShown=want;const b=document.getElementById('downBtn');b.style.display=want?'flex':'none';if(!want){inp.down=false;b.classList.remove('on');}}}
+let downShown=false,downLab='';function syncDown(){syncUp();const duckLv=!!(LV&&(LV.water||LV.duck)),nearOut=!!(L&&L.near&&(L.near.exit||P.zone>0)),duck=!!(L&&duckLv&&P.zone===0&&!(L.near||L.ladDown||P.climb));const lab=nearOut?'OUT':duck?'DUCK':'DOWN';if(lab!==downLab){downLab=lab;const b=document.getElementById('downBtn');if(b)b.innerHTML='▼<small>'+lab+'</small>';}
+  const want=isTouch&&state==='play'&&!gamePaused&&!!(L&&!L.chase&&!L.abduct&&!L.launch&&(L.near||L.ladDown||P.climb||(LV&&(LV.water||LV.duck)&&P.zone===0)));if(want!==downShown){downShown=want;const b=document.getElementById('downBtn');b.style.display=want?'flex':'none';if(!want){inp.down=false;b.classList.remove('on');}}}
 let goatLab='g';function syncGoatBtn(){const want=L&&LV&&LV.boss==='lasso'&&L.chase==='on'?'l':'g';if(want===goatLab)return;goatLab=want;const b=document.querySelector('.btn.goat');b.innerHTML=want==='l'?'🤠<small>LASSO</small>':'🐐<small>HEADBUTT</small>';}
 let topShown=null;function updTop(){syncDown();syncGoatBtn();const k=(state==='title'?'':'h')+(PLAYISH.includes(state)?'p':'');if(k===topShown)return;topShown=k;
   document.getElementById('homeB').style.display=k.includes('h')?'':'none';document.getElementById('pauseB').style.display=k.includes('p')?'':'none';}
