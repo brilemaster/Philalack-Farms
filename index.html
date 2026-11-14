@@ -19,6 +19,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 .btn.big{width:122px;height:122px;font-size:44px;background:rgba(95,208,74,.5)}
 .btn.goat{background:rgba(232,196,90,.5)}
 .btn.down{background:rgba(156,106,55,.8);animation:pulse .6s infinite alternate}
+.btn.up{background:rgba(61,143,214,.85);animation:pulse .6s infinite alternate}
 .btn.on{background:rgba(255,255,255,.6);transform:scale(.94)}
 .btn.glow{background:rgba(255,210,63,.9);box-shadow:0 0 0 8px rgba(255,210,63,.55);animation:pulse .5s infinite alternate}
 @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
@@ -45,7 +46,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 @media (max-height:500px){
   .btn{width:80px;height:80px;font-size:28px;border-width:2.5px;background:rgba(30,20,15,.28);box-shadow:none}
   .btn.big{width:94px;height:94px;font-size:34px}
-  .btn.goat,.btn.down{width:76px;height:76px;font-size:24px}
+  .btn.goat,.btn.down,.btn.up{width:76px;height:76px;font-size:24px}
   .btn small{font-size:9px}
   .ctl{gap:10px;bottom:max(4px,env(safe-area-inset-bottom))}
   .ctl.left{left:max(6px,env(safe-area-inset-left))}
@@ -56,14 +57,14 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <body>
 <div id="wrap"><canvas id="c"></canvas></div>
 <div class="ctl left" id="leftCtl"><div class="btn" data-k="left">◀</div><div class="btn" data-k="right">▶</div></div>
-<div class="ctl right"><div class="btn down" data-k="down" id="downBtn" style="display:none">⬇<small>HOP IN</small></div><div class="btn goat" data-k="butt">🐐<small>HEADBUTT</small></div><div class="btn big" data-k="jump">⬆</div></div>
+<div class="ctl right"><div class="btn up" data-k="up" id="upBtn" style="display:none">⬆<small>CLIMB</small></div><div class="btn down" data-k="down" id="downBtn" style="display:none">⬇<small>DOWN</small></div><div class="btn goat" data-k="butt">🐐<small>HEADBUTT</small></div><div class="btn big" data-k="jump">⬆</div></div>
 <div id="top"><button id="purseB" aria-label="Mom’s purse">👜<span id="purseN"></span></button><button id="homeB" aria-label="Main menu" style="display:none">🏠</button><button id="pauseB" aria-label="Pause" style="display:none">⏸</button><button id="mute" aria-label="Sound on or off">🔊</button></div>
 <div id="pm"><div class="hp"><h1 id="pmH">Paused</h1><button class="go" id="pmGo">▶ Keep playing</button><button class="mid" id="pmRe">↺ Back to last scarecrow</button><button class="home" id="pmHome">🏠 Main menu</button><p id="pmTip">Your progress is saved at the last scarecrow.</p></div></div>
 <div id="purse"><div class="hp"><h1>👜 Mom’s Purse</h1><p id="purseSub"></p><div id="purseGrid"></div><button id="purseX">◀ Back</button></div></div>
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.19';
+const VERSION='0.20';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -72,7 +73,7 @@ const TEST=/[?&]unlockall/.test(location.search);
    All art is original pixel art drawn in code.
    ========================================================= */
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-let W=960;const H=544,T=32,ROWS=17,GY=14*T,K=1.5;
+let W=960;const H=544,T=32,K=1.5;let ROWS=17,GY=14*T,AY=14*T;
 let RES=1,PHONE=false,ZM=1.3,lastFit='';
 function fit(){const vw=Math.round(document.documentElement.clientWidth||innerWidth),vh=Math.round(innerHeight||document.documentElement.clientHeight);
   const key=vw+'x'+vh;if(key===lastFit)return;lastFit=key;
@@ -92,12 +93,13 @@ let MODE=store.get('mode','n');if(!['e','n','h'].includes(MODE))MODE='n';
 const EASY=()=>MODE==='e',HARD=()=>MODE==='h',MAXH=()=>HARD()?3:5;
 
 /* ---------------- input ---------------- */
-const inp={left:false,right:false,jump:false,butt:false,ok:false,down:false};const prevInp={};
+const inp={left:false,right:false,jump:false,butt:false,ok:false,down:false,up:false};const prevInp={};
 const KEYS={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'jump',KeyW:'jump',Space:'jump',KeyZ:'jump',KeyX:'butt',KeyC:'butt',KeyJ:'butt',ShiftLeft:'butt',Enter:'ok',ArrowDown:'down',KeyS:'down'};
 addEventListener('keydown',e=>{const k=KEYS[e.code];if(k){if(!inp[k]&&(k==='jump'||k==='ok'))userGo('key');inp[k]=true;e.preventDefault();}
   if(e.code==='Escape'||e.code==='KeyP'){if(gamePaused)resumeGame();else if(PLAYISH.includes(state))pauseGame('pause');}
   if(e.code==='Backspace'&&state==='story'){storyBack();}});
-addEventListener('keyup',e=>{const k=KEYS[e.code];if(k){inp[k]=false;e.preventDefault();}});
+addEventListener('keyup',e=>{const k=KEYS[e.code];if(k){inp[k]=false;e.preventDefault();}if(e.code==='ArrowUp'||e.code==='KeyW')inp.up=false;});
+addEventListener('keydown',e=>{if(e.code==='ArrowUp'||e.code==='KeyW')inp.up=true;});
 function pressed(k){return inp[k]&&!prevInp[k];}
 const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 const ctlEls=[...document.querySelectorAll('.ctl')];let ctlShown=false;
@@ -399,6 +401,8 @@ Object.assign(TILE,{
   metal:makeSprite(32,32,(R)=>{R(0,0,32,32,'#8f98a3');for(let x=0;x<32;x+=8){R(x,0,3,32,'#b9c1ca');R(x+3,0,1,32,'#d8dee5');R(x+6,0,2,32,'#6f7883');}R(0,0,32,1,'#c9d0d8');for(const x of [4,20])R(x,14,2,2,'#59616b');},true)});
 function baleSprite(r){const d=r*2+2;return makeSprite(d,d,(R,P,E)=>{const c=r+1;E(c,c,r,r,'#c9a23e');E(c,c,r*.86,r*.86,'#e8c45a');E(c,c,r*.64,r*.64,'#d4ad4a');E(c,c,r*.46,r*.46,'#f0cd6a');E(c,c,r*.24,r*.24,'#d4ad4a');E(c,c,r*.1,r*.1,'#b8902a');
   R(c-1,c-r+2,2,r-3,'#b8902a');R(c,c,r-2,2,'#fff0a8');for(const [a,b] of [[.3,.2],[.7,.8],[.2,.75],[.8,.3]])R(Math.round(d*a),Math.round(d*b),3,1,'#fff0a8');});}
+TILE.ladder=makeSprite(32,32,(R)=>{R(5,0,4,32,'#8a5326');R(6,0,1,32,'#b5753d');R(23,0,4,32,'#8a5326');R(24,0,1,32,'#b5753d');for(const y of [5,15,25]){R(5,y,22,3,'#a8692f');R(5,y,22,1,'#d0904f');}},true);
+TILE.loft=makeSprite(32,32,(R)=>{R(0,0,32,32,'#9a5f30');R(0,0,32,3,'#d0904f');R(0,3,32,2,'#b5753d');R(0,30,32,2,'#6b3f1c');R(0,14,32,1,'#7a4a24');R(0,22,32,1,'#7a4a24');for(const x of [3,28])R(x,7,2,2,'#5a3a1a');R(15,0,1,14,'#7a4a24');},true);
 const BALE=baleSprite(14),BIGBALE=baleSprite(44);
 const CRACK=makeSprite(32,32,(R)=>{for(const [x,y] of [[16,2],[15,4],[17,6],[16,8],[14,10]])R(x,y,2,2,'#c49a35');},true);
 function scarecrowSprite(on){return makeSprite(40,76,(R,P,E)=>{
@@ -497,15 +501,15 @@ function paintCave(cx){const bw=Math.ceil(W/2),bh=H/2;if(bgc.width!==bw){bgc.wid
   bg.fillStyle='#6b4a2a';for(let i=0;i<10;i++){const x=wrap(i*83-cx*.2,bw+40)-20;bg.fillRect(x,0,2,10+(i%4)*6);}}
 function bgSize(){const bw=Math.ceil(W/2),bh=H/2;if(bgc.width!==bw){bgc.width=bw;bgc.height=bh;}return [bw,bh];}
 // inside the big red barn
-function paintBarn(cx,gy){const [bw,bh]=bgSize(),g2=gy/2;
-  bg.fillStyle='#7a3a26';bg.fillRect(0,0,bw,bh);const o1=Math.round(cx*.1);for(let x=-(o1%12);x<bw;x+=12){bg.fillStyle='#6a3020';bg.fillRect(x,0,1,bh);bg.fillStyle='#8a4630';bg.fillRect(x+1,0,1,bh);}
-  for(let i=0;i<4;i++){const x=Math.round(wrap(i*160+50-cx*.16,bw+160)-80),y=Math.round(g2-160);bg.fillStyle='rgba(255,236,170,.09)';bg.beginPath();bg.moveTo(x,y+40);bg.lineTo(x+40,y+40);bg.lineTo(x+110,g2);bg.lineTo(x+40,g2);bg.closePath();bg.fill();
-    bg.fillStyle='#3a1a10';bg.fillRect(x-3,y-3,46,46);bg.fillStyle='#9fdcff';bg.fillRect(x,y,40,40);bg.fillStyle='#d4f1ff';bg.fillRect(x,y,40,12);bg.fillStyle='#3a1a10';bg.fillRect(x+19,y,3,40);bg.fillRect(x,y+19,40,3);}
-  const o3=cx*.28,by1=Math.round(g2-205),by2=Math.round(g2-100);bg.fillStyle='#3e1d12';bg.fillRect(0,by1,bw,9);bg.fillRect(0,by2,bw,8);bg.fillStyle='#5a2c1a';bg.fillRect(0,by1,bw,2);bg.fillRect(0,by2,bw,2);
-  for(let i=0;i<5;i++){const x=Math.round(wrap(i*170-o3,bw+170)-85);bg.fillStyle='#3e1d12';bg.fillRect(x,0,11,bh);bg.fillStyle='#5a2c1a';bg.fillRect(x,0,2,bh);
-    for(let k=0;k<30;k++){bg.fillRect(x+11+k*2,by2+8+k*2,4,4);bg.fillRect(x-4-k*2,by2+8+k*2,4,4);}
-    const lx=x+85,ly=by2+30;bg.fillStyle='#2a160c';bg.fillRect(lx,by2+8,1,22);bcirc(lx,ly+6,18,'rgba(255,200,90,.12)');bcirc(lx,ly+6,11,'rgba(255,210,110,.22)');bg.fillStyle='#2a2a30';bg.fillRect(lx-4,ly,9,3);bg.fillStyle='#ffd25a';bg.fillRect(lx-3,ly+3,7,7);bg.fillStyle='#fff3c4';bg.fillRect(lx-1,ly+5,3,3);bg.fillStyle='#2a2a30';bg.fillRect(lx-4,ly+10,9,2);}
-  const o4=cx*.45;for(let i=0;i<7;i++){const x=Math.round(wrap(i*110-o4,bw+120)-60);for(const [a,b,rr2] of [[0,0,22],[24,4,18],[-20,6,16]])bcirc(x+a,Math.round(g2+8+b),rr2,'#b98a3a');bcirc(x+4,Math.round(g2+4),12,'#d0a24a');}
+function paintBarn(cx,cy){const [bw,bh]=bgSize(),px=cx*ZM*.15,py=cy*ZM*.15;
+  bg.fillStyle='#7a3a26';bg.fillRect(0,0,bw,bh);const o1=Math.round(px*.6)%12;for(let x=-o1;x<bw;x+=12){bg.fillStyle='#6a3020';bg.fillRect(x,0,1,bh);bg.fillStyle='#8a4630';bg.fillRect(x+1,0,1,bh);}
+  const SX=170,SY=150,ox=Math.round(px)%SX,oy=Math.round(py)%SY;
+  for(let gy=-oy-SY;gy<bh+SY;gy+=SY){for(let gx=-ox-SX;gx<bw+SX;gx+=SX){const x=gx+64,y=gy+30;
+      bg.fillStyle='rgba(255,236,170,.08)';bg.beginPath();bg.moveTo(x,y+40);bg.lineTo(x+40,y+40);bg.lineTo(x+100,y+110);bg.lineTo(x+40,y+110);bg.closePath();bg.fill();
+      bg.fillStyle='#3a1a10';bg.fillRect(x-3,y-3,46,46);bg.fillStyle='#9fdcff';bg.fillRect(x,y,40,40);bg.fillStyle='#d4f1ff';bg.fillRect(x,y,40,12);bg.fillStyle='#3a1a10';bg.fillRect(x+19,y,3,40);bg.fillRect(x,y+19,40,3);
+      const lx=gx+140,ly=gy+128;bg.fillStyle='#2a160c';bg.fillRect(lx,gy+116,1,12);bcirc(lx,ly+6,16,'rgba(255,200,90,.12)');bg.fillStyle='#2a2a30';bg.fillRect(lx-4,ly,9,3);bg.fillStyle='#ffd25a';bg.fillRect(lx-3,ly+3,7,7);bg.fillStyle='#fff3c4';bg.fillRect(lx-1,ly+5,3,3);bg.fillStyle='#2a2a30';bg.fillRect(lx-4,ly+10,9,2);}
+    bg.fillStyle='#3e1d12';bg.fillRect(0,gy+108,bw,8);bg.fillStyle='#5a2c1a';bg.fillRect(0,gy+108,bw,2);}
+  for(let gx=-ox-SX;gx<bw+SX;gx+=SX){bg.fillStyle='#3e1d12';bg.fillRect(gx,0,11,bh);bg.fillStyle='#5a2c1a';bg.fillRect(gx,0,2,bh);}
   bg.fillStyle='rgba(40,16,8,.18)';bg.fillRect(0,0,bw,bh);}
 // the secret hayloft, up under the roof
 function paintLoft(cx){const [bw,bh]=bgSize();
@@ -538,7 +542,7 @@ const dillSpr=fr=>spr('dill'+fr,()=>dillSprite(fr));
 
 /* ---------------- level building ---------------- */
 function E(t,x,y,w,h,o){return Object.assign({t,x,y,w,h,vx:0,vy:0,alive:true,dead:0,t0:0,rot:0,honkT:0},o||{});}
-const SOLID='#HBFCSXMQRUJDKZ';const ONEWAY=c=>c==='-'||c==='=';const solidC=c=>c!==' '&&SOLID.includes(c);
+const SOLID='#HBFCSXMQRUJDKZW';const ONEWAY=c=>c==='-'||c==='=';const solidC=c=>c!==' '&&SOLID.includes(c);
 function buildW1(){
   const w=341,g=Array.from({length:ROWS},()=>Array(w).fill(' '));
   const b={w,g,items:[],ents:[],spawners:[],decor:[],signs:[],burrows:[],checks:[],doors:[],chests:[],hens:[],hints:[]};
@@ -572,7 +576,7 @@ function buildW1(){
   // the secret chicken coop, hidden behind loose hay
   b.decor.push({kind:'coop',x:124*T,y:GY});block(126,129,11,'B');
   b.doors.push({x:127*T,y:12*T,w:64,h:64,to:{zone:1,x:261*T,y:GY},need:{x:127,y:13},secret:'coop',title:'SECRET COOP!',sub:'The hens have been hiding eggs'});
-  b.hints.push({x:126*T,y:11*T,kind:'hen'});
+  b.hints.push({x:126*T,y:11*T,kind:'hen',need:{x:127,y:13},crack:{x:127,y:12}});
   for(const [x,s] of [[108,1],[112,0],[116,1],[122,1],[134,0],[137,1]])b.decor.push({kind:'pumpkin',x:x*T+16,smashed:!!s});
   b.spawners.push({x:139*T,y:GY-26,cd:40});arc(139,12,6,2.6);
   // planks
@@ -608,78 +612,76 @@ function kit(w,floor){const g=Array.from({length:ROWS},()=>Array(w).fill(' '));
     eggs:(x,y,n)=>{for(let i=0;i<n;i++)egg(x+i,y);},
     arc:(x,y,n,hgt)=>{for(let i=0;i<n;i++){const k=n>1?i/(n-1):.5;b.items.push({t:'egg',x:(x+i)*T+6,y:(y-Math.sin(k*Math.PI)*hgt)*T+4,w:20,h:24,ph:i});}},
     gold:(x,y,k)=>b.items.push({t:'gold',k,x:x*T+4,y:y*T+2,w:24,h:28}),
-    goose:(x,o)=>b.ents.push(E('goose',x*T,14*T-30,28,30,Object.assign({vx:-.9},o||{}))),
-    sign:(x,text)=>b.signs.push({x:x*T+16,text})};}
-/* World 2: Hayloft Heights (inside the big red barn) */
-function buildW2(){const {g,b,fill,egg,ground,block,plank,eggs,arc,gold,goose,sign}=kit(341,'S');
-  fill(0,0,0,13,'F');
-  ground(0,111);ground(121,255);
-  sign(3,'Hayloft Heights');eggs(6,13,4);
-  g[11][11]='X';g[11][12]='M';g[11][13]='Q';eggs(11,9,3);
-  // the first springy bale (hold jump to go even higher)
-  sign(17,'Springy bales!');g[13][21]='J';for(let y=6;y<=11;y++)egg(21,y);g[4][21]='I';b.hints.push({x:21*T+16,y:4*T+16,kind:'sparkle'});
-  plank(23,28,7);eggs(23,6,6);arc(29,12,5,2);goose(33);
-  // hay-bale stairs up to the catwalk
-  block(36,37,12);block(39,40,10);block(42,43,8);plank(44,57,8);eggs(45,7,12);goose(48);goose(54);
-  // golden egg 1: drop onto the springy bales and bounce way up
-  block(60,61,12);g[11][60]='J';g[11][61]='J';plank(62,66,5);gold(64,4,0);eggs(62,4,2);arc(67,12,5,2.4);
-  // Dill's tunnel under the barn floor
-  sign(70,'Dill’s burrow');
-  b.burrows.push({x:73*T+16,y:GY,kind:'tunnel',ex:93*T+16,dug:0,junk:[{x:76*T,kind:'sock'},{x:80*T,kind:'spatula'},{x:84*T,kind:'binky'},{x:88*T,kind:'coin'}]});
-  block(78,79,12);block(82,84,10);eggs(82,9,3);goose(87);goose(91);
-  b.checks.push({x:97*T,on:false});
-  eggs(99,13,4);g[11][103]='X';g[11][104]='M';g[11][105]='X';
-  // bounce across the hay chute
-  sign(108,'Bounce house!');fill(112,120,16,16,'S');fill(112,120,15,15,'J');
-  plank(112,120,7);eggs(112,6,9);arc(112,10,9,1.5);
-  b.spawners.push({x:138*T,y:GY-30,cd:60,t:'bale'});arc(124,12,7,2.6);eggs(131,13,4);
-  // loose hay hides the hatch up to the secret hayloft
-  block(147,148,12);block(150,160,10);
-  b.decor.push({kind:'hatch',x:155*T,y:10*T});fill(154,157,7,9,'B');
-  b.doors.push({x:155*T,y:8*T,w:64,h:64,to:{zone:1,x:261*T,y:GY},need:{x:155,y:9},secret:'loft',title:'SECRET HAYLOFT!',sub:'The hens moved upstairs'});
-  b.hints.push({x:152*T,y:7*T,kind:'hen',t1:'Psst! There’s a hatch behind this hay…',t2:'Headbutt it with 🐐!'});
-  eggs(150,9,3);eggs(158,9,3);
-  // goose ride and a springy bale up to Dill's secret burrow
-  sign(164,'Ride a goose!');goose(168,{saddle:true,vx:-.5});arc(169,7,10,3);
-  g[13][180]='J';plank(184,191,8);eggs(184,7,3);
-  b.burrows.push({x:189*T+16,y:8*T,kind:'room',to:{zone:2,x:299*T,y:GY},secret:'bin',title:'SECRET GRAIN BIN!',sub:'Dill tunneled into the corn'});
-  g[11][195]='I';b.hints.push({x:195*T+16,y:11*T+16,kind:'sparkle'});
-  b.checks.push({x:199*T,on:false});
-  eggs(202,13,5);goose(206);goose(210);b.spawners.push({x:217*T,y:GY-30,cd:90,t:'bale'});arc(212,12,5,2.4);
-  sign(220,'The hay ring!');
-  // the hay ring (rodeo arena); the big barn doors are on the right
-  fill(255,255,0,13,'D');plank(230,234,10,'-');plank(246,250,10,'-');
-  // secret room 1: the hayloft
-  fill(258,293,0,3,'F');fill(258,258,0,13,'F');fill(293,293,0,13,'F');fill(258,293,14,ROWS-1,'S');
-  plank(262,265,10);plank(268,273,7);plank(276,279,10);plank(282,287,7);g[13][266]='J';g[13][280]='J';
-  eggs(262,9,4);eggs(268,6,2);gold(270,6,1);eggs(272,6,2);eggs(276,9,4);eggs(282,6,6);for(let y=6;y<=11;y++){egg(266,y);egg(280,y);}arc(260,12,5,1.2);arc(284,12,5,1.2);
-  b.doors.push({x:289*T,y:12*T,w:64,h:64,to:{zone:0,x:159.5*T,y:10*T}});
-  for(const [x,y] of [[263,10],[269,7],[277,10],[285,7]])b.hens.push({x:x*T,y:y*T});
-  // secret room 2: the grain bin
-  fill(296,339,0,3,'Z');fill(296,296,0,13,'Z');fill(339,339,0,13,'Z');fill(296,339,14,ROWS-1,'K');
-  block(302,304,12,'K');eggs(302,11,3);plank(307,310,9);gold(308,8,2);arc(306,12,6,1.2);block(313,315,11,'K');eggs(313,10,3);
-  g[13][318]='J';plank(320,324,6);eggs(320,5,5);for(let y=7;y<=11;y++)egg(318,y);
-  b.chests.push({x:328*T,y:GY,open:false});b.items.push({t:'junk',kind:'shades',x:332*T,y:GY-26,w:26,h:24});
-  b.burrows.push({x:336*T+16,y:GY,kind:'room',to:{zone:0,x:189*T+16,y:8*T},exitOnly:true});
+    goose:(x,o)=>b.ents.push(E('goose',x*T,((o&&o.row)||14)*T-30,28,30,Object.assign({vx:-.9},o||{}))),
+    sign:(x,text,row)=>b.signs.push({x:x*T+16,text,y:row?row*T:null})};}
+/* Level 2: Hayloft Heights. A climb from the barn floor to the hay ring at the very top */
+function buildW2(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank}=kit(124,'S');
+  // the barn shell: walls, the hay chute on the right, the big doors at the bottom of the chute
+  fill(0,0,0,65,'F');fill(37,37,2,62,'F');fill(41,41,0,56,'F');fill(41,41,57,62,'D');
+  fill(0,40,63,65,'S');fill(41,48,63,65,'#');
+  // loft floors, bottom to top, each with its openings
+  const floor=(row,holes)=>{fill(1,36,row,row,'W');for(const [a,c] of holes)fill(a,c,row,row,' ');};
+  floor(52,[[18,18]]);floor(46,[[4,6]]);floor(40,[[31,33]]);floor(34,[[4,6],[17,18]]);floor(28,[[31,33],[17,18],[24,25]]);floor(22,[[4,6],[24,25]]);floor(17,[[31,33]]);floor(12,[[3,3]]);
+  const lad=(x,r1,r2)=>fill(x,x,r1,r2,'L');
+  lad(32,40,45);lad(5,22,27);lad(3,12,16);
+  // GROUND FLOOR: the ladder up is hidden behind loose hay
+  sign(2,'Hayloft Heights');eggs(4,62,5);g[60][5]='X';g[60][6]='M';g[60][7]='Q';eggs(5,58,3);goose(10,{row:63});
+  fill(15,21,58,62,'B');b.reveal=[];for(let r=52;r<=62;r++)b.reveal.push([18,r,'L']);b.decor.push({kind:'ladderhint',x:18*T,y1:52*T,y2:63*T});
+  b.hints.push({x:15*T,y:58*T,kind:'hen',need:{x:18,y:62},crack:{x:18,y:61},t1:'Psst! The ladder is behind this hay…',t2:'Headbutt it with 🐐!'});
+  b.burrows.push({x:23*T+16,y:GY,kind:'tunnel',ex:34*T+16,dug:0,junk:[{x:26*T,kind:'sock'},{x:29*T,kind:'spatula'},{x:32*T,kind:'binky'}]});
+  g[62][30]='J';for(let y=56;y<=60;y++)egg(30,y);g[54][30]='I';b.hints.push({x:30*T+16,y:54*T+16,kind:'sparkle'});
+  // LOFT 1
+  b.checks.push({x:20*T,y:52*T,on:false});fill(4,6,49,51,'H');g[49][10]='X';g[49][11]='R';g[49][12]='X';eggs(22,51,8);goose(26,{row:52});eggs(4,48,3);
+  // LOFT 2: rolling hay comes from the right; ladder up on the right
+  eggs(9,45,7);g[43][20]='X';g[43][21]='M';g[43][22]='X';goose(14,{row:46});b.spawners.push({x:35*T,y:46*T-30,cd:60,t:'bale'});for(let y=41;y<=44;y++)egg(33,y);
+  // LOFT 3: a springy bale up through the left opening
+  g[39][5]='J';for(let y=35;y<=37;y++)egg(5,y);eggs(12,39,8);goose(16,{row:40});
+  // LOFT 4: Dill's burrow to the grain bin, and a gap to hop
+  b.checks.push({x:10*T,y:34*T,on:false});fill(31,33,31,33,'H');eggs(31,30,3);arc(15,32,6,1.2);eggs(21,33,4);
+  b.burrows.push({x:28*T+16,y:34*T,kind:'room',to:{zone:2,x:91*T,y:GY},secret:'bin',calm:true,title:'SECRET GRAIN BIN!',sub:'Nice and quiet in here…'});
+  // LOFT 5: loose hay hides a door; the golden egg floats over a real gap
+  fill(1,3,25,27,'B');b.decor.push({kind:'sdoor',x:1*T,y:28*T});
+  b.doors.push({x:1*T,y:26*T,w:64,h:64,to:{zone:1,x:53*T,y:GY},need:{x:2,y:27},secret:'roost',title:'SECRET HEN ROOST!',sub:'The hens have been hoarding eggs!'});
+  b.hints.push({x:1*T-16,y:25*T,kind:'hen',need:{x:2,y:27},crack:{x:2,y:26},t1:'Psst! There’s a door behind this hay…',t2:'Headbutt it with 🐐!'});
+  gold(17,25,0);eggs(8,27,6);arc(23,26,4,1);goose(12,{row:28});b.spawners.push({x:35*T,y:28*T-30,cd:90,t:'bale'});
+  // LOFT 6: springy bale up through the right opening
+  g[21][32]='J';eggs(9,21,7);g[19][12]='X';g[19][13]='Q';g[19][14]='X';arc(22,20,6,1.5);goose(16,{row:22});for(let y=15;y<=19;y++)egg(32,y);
+  // LOFT 7: the last stretch, then the ladder up to the hay ring
+  b.checks.push({x:22*T,y:17*T,on:false});eggs(10,16,16);goose(14,{row:17});sign(6,'Hay ring ⬆',17);
+  // THE HAY RING (rodeo arena) at the very top
+  plank(12,16,8,'-');plank(28,32,8,'-');
+  b.decor.push({kind:'chute'});
+  // secret room 1 (busy): the hen roost
+  fill(50,85,49,52,'F');fill(50,50,49,62,'F');fill(85,85,49,62,'F');fill(50,85,63,65,'S');
+  plank(54,57,59);plank(60,65,56);plank(68,71,59);plank(74,79,56);g[62][58]='J';g[62][72]='J';
+  eggs(54,58,4);eggs(60,55,2);gold(62,55,1);eggs(64,55,2);eggs(68,58,4);eggs(74,55,6);for(let y=55;y<=60;y++){egg(58,y);egg(72,y);}arc(52,61,5,1.2);arc(76,61,5,1.2);
+  b.doors.push({x:81*T,y:61*T,w:64,h:64,to:{zone:0,x:4.5*T,y:28*T}});
+  for(const [x,y] of [[55,59],[61,56],[69,59],[77,56]])b.hens.push({x:x*T,y:y*T});
+  // secret room 2 (relaxed): the grain bin
+  fill(88,123,49,52,'Z');fill(88,88,49,62,'Z');fill(123,123,49,62,'Z');fill(88,123,63,65,'K');
+  fill(96,98,61,62,'K');eggs(96,60,3);fill(104,106,60,62,'K');gold(105,59,2);eggs(100,62,3);eggs(108,62,3);
+  b.chests.push({x:112*T,y:GY,open:false});b.items.push({t:'junk',kind:'shades',x:117*T,y:GY-26,w:26,h:24});
+  b.burrows.push({x:120*T+16,y:GY,kind:'room',to:{zone:0,x:28*T+16,y:34*T},exitOnly:true});
   return b;}
 let LV=null,ZONES=null,ARL=0,ARR=0;
 const LEVELS=[
-  {name:'Pumpkin Patch',build:buildW1,floor:'#',zones:[{x0:0,x1:256*T,kind:'out'},{x0:258*T,x1:294*T,kind:'coop'},{x0:296*T,x1:340*T,kind:'cave'}],
-   arena:[226,255],fenceX:225,penX:227,wfX:246,giantX:240,showCow:205,escape:'pumpkin',crashCol:255,hay:{x:127,y:13},crack:{x:127,y:12},cowBoost:0,
-   jumps:[['Start',5,GY],['Tunnel',79,GY],['Coop',121,GY],['Cave',200,8*T],['Pen',221,GY]],
+  {name:'Pumpkin Patch',build:buildW1,floor:'#',rows:17,gy:14,arenaRow:14,easyFill:true,zones:[{x0:0,x1:256*T,kind:'out'},{x0:258*T,x1:294*T,kind:'coop'},{x0:296*T,x1:340*T,kind:'cave'}],
+   arena:[226,255],fenceX:225,penIn:()=>P.x>227*T,wfX:246,giantX:240,showCow:205,escape:'pumpkin',crashCol:255,cowBoost:0,
+   jumps:[['Start',5,14*T],['Tunnel',79,14*T],['Coop',121,14*T],['Cave',200,8*T],['Pen',221,14*T]],
    intro:()=>INTRO,introId:'intro',
    penStory:[{who:'Hero',text:'There he is!'},{who:'Other',text:'Jump on his back, then tap JUMP every time he bucks so you don’t fall off!'},{who:'Other',text:'Stay on for 3 bucks, 3 times, and he’ll be too tired to run.'},{who:'Waffles',text:'Moo. (Challenge accepted.)'}],penId:'pen2',
    escStory:[{who:'Hero',text:'He’s… in a pumpkin.'},{who:'Other',text:'And he’s rolling toward the barn. Of course he is.'}],
    clearLine:'Waffles rolled off toward the barn…'},
-  {name:'Hayloft Heights',build:buildW2,floor:'S',zones:[{x0:0,x1:256*T,kind:'barn'},{x0:258*T,x1:294*T,kind:'loft'},{x0:296*T,x1:340*T,kind:'bin'}],
-   arena:[226,255],fenceX:225,penX:227,wfX:246,giantX:238,showCow:205,escape:'bale',crashCol:255,hay:{x:155,y:9},crack:{x:155,y:8},cowBoost:.4,baleDrop:true,
-   jumps:[['Start',5,GY],['Springs',100,GY],['Hatch',144,GY],['Goose',163,GY],['Ring',221,GY]],
+  {name:'Hayloft Heights',build:buildW2,floor:'S',rows:66,gy:63,arenaRow:12,vertical:true,fallHurt:true,
+   zones:[{x0:0,x1:49*T,y0:0,y1:66*T,kind:'barn'},{x0:50*T,x1:86*T,y0:49*T,y1:66*T,kind:'loft'},{x0:88*T,x1:124*T,y0:49*T,y1:66*T,kind:'bin'}],
+   arena:[8,37],fenceX:7,penIn:()=>P.x>9*T&&P.y+P.h<=12*T+2&&P.onG,wfX:28,giantX:0,showCow:0,escape:'chute',chute:{x:38,wall:37,doors:41},outside:41,cowBoost:.4,baleDrop:true,
+   jumps:[['Start',3,63*T],['Hay',12,63*T],['Lofts',20,52*T],['Gap',12,28*T],['Top',22,17*T]],
    intro:()=>INTRO2,introId:'intro2',introLevel:true,
-   penStory:[{who:'Hero',text:'Waffles! Off the hay! Into the ring!'},{who:'Other',text:'Same as before: jump on, and tap JUMP every time he bucks. 3 bucks, 3 times.'},{who:'Other',text:'And heads up! Every time he bonks a wall, hay bales fall from the loft.'},{who:'Waffles',text:'Moo. (I have been practicing.)'}],penId:'pen3',
-   escStory:[{who:'Hero',text:'Is he… log-rolling a hay bale?'},{who:'Other',text:'Right out the barn doors. Downhill. Toward the creek.'},{who:'Waffles',text:'MOOOO! (Wheeee!)'}],
-   clearLine:'Waffles log-rolled out the barn doors toward the creek…'}];
+   penStory:[{who:'Hero',text:'Made it to the top! And there’s Waffles in the hay ring.'},{who:'Other',text:'Same as before: jump on, and tap JUMP every time he bucks. 3 bucks, 3 times.'},{who:'Other',text:'And heads up! Every time he bonks a wall, hay bales fall from the rafters.'},{who:'Waffles',text:'Moo. (I have been practicing.)'}],penId:'pen3',
+   escStory:[{who:'Hero',text:'Did he just… slide down the hay chute?'},{who:'Other',text:'And right out the barn doors. Toward the creek.'},{who:'Waffles',text:'MOOOO! (Wheeee!)'}],
+   clearLine:'Waffles slid down the hay chute and out toward the creek…'}];
 const CHAPTER=['Pumpkin Patch','Hayloft Heights','Creek Crossing','Corn Maze','Smokehouse Showdown'];
-const looseHay=()=>!!(LV&&LV.hay&&L.g[LV.hay.y][LV.hay.x]==='B');
+const looseHay=h=>!!(h&&h.need&&L.g[h.need.y][h.need.x]==='B');
 
 /* ---------------- state ---------------- */
 const cam={x:0,y:0};
@@ -695,21 +697,21 @@ function confetti(x,y,n){const cols=['#ff5c8a','#ffd23f','#4aa3ff','#5fd04a','#b
 function popText(t,x,y,c,big){parts.push({kind:'text',text:t,x,y,vx:0,vy:-.9,life:big?90:60,c:c||'#ffd23f',big});}
 function showBanner(text,sub,col){banner={text,sub,col:col||'#ffd23f',t:0};}
 
-function loadLevel(i,fromCheck){lvlIdx=i;LV=LEVELS[i];ZONES=LV.zones;ARL=LV.arena[0]*T;ARR=LV.arena[1]*T;const b=LV.build();
-  if(EASY())for(let x=1;x<LV.fenceX;x++)if(b.g[14][x]===' ')for(let y=14;y<ROWS;y++)b.g[y][x]=LV.floor;
+function loadLevel(i,fromCheck){lvlIdx=i;LV=LEVELS[i];ROWS=LV.rows;GY=LV.gy*T;AY=LV.arenaRow*T;ZONES=LV.zones;ARL=LV.arena[0]*T;ARR=LV.arena[1]*T;const b=LV.build();
+  if(EASY()&&LV.easyFill)for(let x=1;x<LV.fenceX;x++)if(b.g[14][x]===' ')for(let y=14;y<ROWS;y++)b.g[y][x]=LV.floor;
   L={w:b.w,g:b.g,items:b.items,ents:b.ents,spawners:b.spawners,decor:b.decor,signs:b.signs,burrows:b.burrows,checks:b.checks,doors:b.doors,chests:b.chests,hens:b.hens,hints:b.hints,
-     bumpA:null,eggs:0,chase:null,giant:{x:LV.giantX*T,y:GY,r:LV.escape==='bale'?46:44,rot:0,vx:0},springA:null,runner:{x:9*T,t:0},hinted:{},combo:0,comboT:0,bestCombo:0,secrets:{},multi:{},rides:0,dug:{}};
+     bumpA:null,eggs:0,chase:null,reveal:b.reveal||[],camFollow:null,lean:0,giant:{x:LV.giantX*T,y:AY,r:LV.escape==='bale'?46:44,rot:0,vx:0},springA:null,runner:{x:9*T,t:0},hinted:{},combo:0,comboT:0,bestCombo:0,secrets:{},multi:{},rides:0,dug:{}};
   const saved=(store.get('gold',{})||{})[i]||[0,0,0];L.goldHad=saved.slice();L.gold=[0,0,0];
   if(HARD())for(const e of L.ents)if(!e.saddle)e.vx*=1.4;
   if(EASY()){L.ents=L.ents.filter((e,k)=>e.saddle||k%3!==2);for(const e of L.ents)e.vx*=.6;}
   P.h=Math.max(24,Math.round(hero().H*.82));P.w=22;
-  Object.assign(P,{x:5*T,vx:0,vy:0,face:1,hearts:MAXH(),hat:false,inv:0,jumping:false,buf:0,coy:0,anim:0,warp:null,sink:0,zone:0,turbo:0,holdT:0,sq:0,ride:null,mount:null,chain:0});
-  L.check={x:P.x};
+  Object.assign(P,{x:5*T,vx:0,vy:0,face:1,hearts:MAXH(),hat:false,inv:0,jumping:false,buf:0,coy:0,anim:0,warp:null,sink:0,zone:0,turbo:0,holdT:0,sq:0,ride:null,mount:null,chain:0,climb:false,peakY:null});
+  L.check={x:P.x};L.cracks={};for(const h of L.hints)if(h.crack)L.cracks[h.crack.x+','+h.crack.y]=1;
   const ck=fromCheck?store.get('check',null):null;
-  if(ck&&ck.w===i){P.x=ck.x;L.check={x:ck.x};for(const c of L.checks)if(c.x<=ck.x)c.on=true;L.runner=null;L.eggs=ck.eggs||0;}
-  P.y=GY-P.h;P.safe={x:P.x,y:P.y};
-  Object.assign(G,{x:P.x-34,y:GY-G.h,vx:0,vy:0,mode:'walk',face:1});
-  L.wf={x:LV.wfX*T,y:GY-54,w:84,h:54,face:-1,st:'idle',t:0,vx:0,hidden:false,hop:0,rot:0};
+  if(ck&&ck.w===i){P.x=ck.x;L.check={x:ck.x,y:ck.y};for(const c of L.checks)if(c.y==null?c.x<=ck.x:c.y>=(ck.y||GY))c.on=true;L.runner=null;L.eggs=ck.eggs||0;}
+  P.y=(L.check.y||GY)-P.h;P.safe={x:P.x,y:P.y};
+  Object.assign(G,{x:P.x-34,y:P.y+P.h-G.h,vx:0,vy:0,mode:'walk',face:1});
+  L.wf={x:LV.wfX*T,y:AY-54,w:84,h:54,face:-1,st:'idle',t:0,vx:0,hidden:false,hop:0,rot:0};
   parts=[];shake=0;flash=0;banner=null;cam.y=0;ZM=zoomBase();updCam(true);}
 
 /* ---------------- physics ---------------- */
@@ -719,7 +721,7 @@ function moveX(o){o.hitW=false;o.x+=o.vx;const y1=Math.floor(o.y/T),y2=Math.floo
   if(o.vx>0){const tx=Math.floor((o.x+o.w-1)/T);for(let ty=y1;ty<=y2;ty++)if(solidAt(tx,ty)){o.x=tx*T-o.w;o.vx=0;o.hitW=true;o.hitTile={tx,ty};break;}}
   else if(o.vx<0){const tx=Math.floor(o.x/T);for(let ty=y1;ty<=y2;ty++)if(solidAt(tx,ty)){o.x=(tx+1)*T;o.vx=0;o.hitW=true;o.hitTile={tx,ty};break;}}}
 function moveY(o){const pb=o.y+o.h;o.onG=false;o.bump=null;o.spring=null;o.y+=o.vy;const x1=Math.floor(o.x/T),x2=Math.floor((o.x+o.w-1)/T);
-  if(o.vy>0){const ty=Math.floor((o.y+o.h)/T);for(let tx=x1;tx<=x2;tx++){const c=tileAt(tx,ty);if(solidC(c)||(ONEWAY(c)&&pb<=ty*T+.5)){o.y=ty*T-o.h;o.vy=0;o.onG=true;if(c==='J')o.spring={tx,ty};break;}}}
+  if(o.vy>0){const ty=Math.floor((o.y+o.h)/T);for(let tx=x1;tx<=x2;tx++){const c=tileAt(tx,ty);if(solidC(c)||((ONEWAY(c)||(c==='L'&&tileAt(tx,ty-1)!=='L'&&!(o===P&&P.climb)))&&pb<=ty*T+.5)){o.y=ty*T-o.h;o.vy=0;o.onG=true;if(c==='J')o.spring={tx,ty};break;}}}
   else if(o.vy<0){const ty=Math.floor(o.y/T);let hit=false;for(let tx=x1;tx<=x2;tx++)if(solidAt(tx,ty)){hit=true;break;}
     if(!hit&&o===P){const cx=Math.floor((o.x+o.w/2)/T);if(tileAt(cx,ty)==='I'){L.g[ty][cx]='X';hit=true;}}
     if(hit){o.y=(ty+1)*T;o.vy=0;const cx=Math.floor((o.x+o.w/2)/T);o.bump=solidAt(cx,ty)?{tx:cx,ty}:{tx:x1,ty};}}}
@@ -740,11 +742,11 @@ function hurt(srcX){if(P.inv>0||state!=='play'||P.warp||P.mount)return;
   if(P.hat){P.hat=false;P.inv=100;P.vy=-6;P.vx=away;sfx('hatoff');parts.push({kind:'hat',x:P.x+P.w/2,y:P.y-6,vx:-away*.6,vy:-5,life:60});popText('Lost your hat!',P.x+P.w/2,P.y-18,'#ffe9b8');return;}
   P.hearts--;P.inv=110;P.vy=-6;P.vx=away;sfx('hurt');shake=5;
   if(P.hearts<=0){setState('oneMore');stopSong();}}
-function fallPit(){if(P.ride)endGooseRide(true);if(P.hat){P.hat=false;sfx('hatoff');}else if(!EASY()){P.hearts--;sfx('hurt');}
+function fallPit(){P.peakY=null;P.climb=false;if(P.ride)endGooseRide(true);if(P.hat){P.hat=false;sfx('hatoff');}else if(!EASY()){P.hearts--;sfx('hurt');}
   if(P.hearts<=0){setState('oneMore');stopSong();return;}
   P.x=P.safe.x;P.y=P.safe.y;P.vx=P.vy=0;P.inv=90;G.x=P.x-30;G.y=P.y+P.h-G.h;G.vy=0;burst(P.x+P.w/2,P.y+P.h,'#fff',8);updCam(true);}
-function respawn(){if(P.ride)endGooseRide(true);P.mount=null;P.hearts=MAXH();P.hat=false;P.inv=120;P.vx=P.vy=0;P.warp=null;P.sink=0;P.zone=0;P.x=L.check.x;P.y=GY-P.h;P.safe={x:P.x,y:P.y};
-  G.x=P.x-34;G.y=GY-G.h;G.mode='walk';L.ents=L.ents.filter(e=>e.t!=='pumpkin'&&e.t!=='bale');
+function respawn(){if(P.ride)endGooseRide(true);P.mount=null;P.hearts=MAXH();P.hat=false;P.inv=120;P.vx=P.vy=0;P.warp=null;P.sink=0;P.zone=0;P.climb=false;P.peakY=null;P.x=L.check.x;P.y=(L.check.y||GY)-P.h;P.safe={x:P.x,y:P.y};
+  G.x=P.x-34;G.y=P.y+P.h-G.h;G.mode='walk';L.ents=L.ents.filter(e=>e.t!=='pumpkin'&&e.t!=='bale');
   if(L.chase==='on'){const wf=L.wf;wf.x=LV.wfX*T;wf.st='idle';wf.t=0;wf.face=-1;wf.rot=0;}
   setState('play');startSong();updCam(true);}
 function bumpTile({tx,ty}){const c=L.g[ty][tx];
@@ -766,7 +768,7 @@ function breakHay(tx,ty){const seen=new Set(),st=[[tx,ty]];let n=0;
   while(st.length){const [x,y]=st.pop(),k=x+','+y;if(seen.has(k)||tileAt(x,y)!=='B')continue;seen.add(k);L.g[y][x]=' ';n++;
     for(let i=0;i<4;i++)parts.push({kind:'straw',x:x*T+16,y:y*T+16,vx:(Math.random()-.5)*7,vy:-Math.random()*6-1,life:50,r:Math.random()*6});
     st.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);}
-  if(n){sfx('straw');shake=6;popText('Something’s behind the hay!',tx*T+16,ty*T-40,'#fff',true);}}
+  if(n){for(const [x,y,c] of L.reveal)if(L.g[y][x]===' ')L.g[y][x]=c;sfx('straw');shake=6;popText('Something’s behind the hay!',tx*T+16,ty*T-40,'#fff',true);}}
 /* ---------- goose ride ---------- */
 function startGooseRide(e){e.gone=true;P.ride={t:EASY()?780:600,flaps:0};P.y-=20;P.h+=20;P.vy=-6;sfx('honk');setTimeout(()=>sfx('yeehaw'),150);
   showBanner('GOOSE RIDE!','Tap jump in the air to flap','#ffffff');}
@@ -781,8 +783,8 @@ function stepWarp(){const w=P.warp,bw=w.bw;w.t++;
     for(const j of bw.junk)if(!j.said&&Math.abs(P.x+P.w/2-(j.x+16))<16){j.said=1;burst(j.x+16,GY+76,'#fff6c8',8,'star');if(j.kind==='coin')addEgg(5);if(!purse[j.kind])collectJunk(j.kind,j.x+16,GY+76);}
     const end=d>0?bw.ex:bw.x;if((d>0&&P.x+P.w/2>=end)||(d<0&&P.x+P.w/2<=end)){P.x=end-P.w/2;w.phase='rise';w.t=0;sfx('pop');burst(end,GY,'#8a5a2e',14);}}
   else if(w.phase==='fade'){if(w.t>=12){const to=bw.to;P.zone=to.zone;P.x=to.x-P.w/2;P.y=to.y-P.h;w.phase='rise';w.t=0;w.bw={x:to.x,y:to.y};G.x=P.x-36;G.y=to.y-G.h;G.vy=0;updCam(true);
-      if(bw.secret){const first=!L.secrets[bw.secret];L.secrets[bw.secret]=1;sfx('secret');confetti(P.x,P.y-20,40);if(first){showBanner(bw.title,bw.sub,'#7dff8a');L.showerAt=frame+80;}else startShower(false);}else sfx('pop');}}
-  else if(w.phase==='rise'){P.sink=Math.max(0,1-w.t/18);if(w.t>=18){P.warp=null;P.sink=0;P.vy=-8;P.safe={x:P.x,y:P.y};L.lockX=P.x;G.x=P.x-36;G.y=P.y+P.h-G.h;G.vy=0;}}
+      if(bw.secret){const first=!L.secrets[bw.secret];L.secrets[bw.secret]=1;sfx('secret');confetti(P.x,P.y-20,40);if(first){showBanner(bw.title,bw.sub,'#7dff8a');if(!bw.calm)L.showerAt=frame+80;}else if(!bw.calm)startShower(false);}else sfx('pop');}}
+  else if(w.phase==='rise'){P.sink=Math.max(0,1-w.t/18);if(w.t>=18){P.warp=null;P.sink=0;P.vy=-8;P.peakY=null;P.safe={x:P.x,y:P.y};L.lockX=P.x;G.x=P.x-36;G.y=P.y+P.h-G.h;G.vy=0;}}
   updCam();}
 function startShower(big){L.shower={t:0,dur:big?600:260,zone:P.zone};showBanner('EGG SHOWER!','Catch the sparkly eggs!','#ff9fd6');}
 function eggPop(it){const c=RCOL[it.c];sfx('sparkle');parts.push({kind:'ring',x:it.x+10,y:it.y+12,c,life:18,vx:0,vy:0});for(let i=0;i<10;i++){const a=i/10*Math.PI*2;parts.push({kind:'star',x:it.x+10,y:it.y+12,vx:Math.cos(a)*3.5,vy:Math.sin(a)*3.5,life:24,c:i%2?c:'#ffffff'});}}
@@ -792,7 +794,7 @@ function updPurseBadge(){const n=purseCount();document.getElementById('purseN').
 function collectJunk(k,wx,wy){purse[k]=1;store.set('purse',purse);sfx('secret');updPurseBadge();
   const sx=(wx-cam.x)*ZM,sy=(wy-cam.y)*ZM;parts.push({kind:'tojunk',k,screen:true,x:sx,y:sy,x0:sx,y0:sy,life:60,vx:0,vy:0});
   const b=document.getElementById('purseB');b.classList.remove('wiggle');void b.offsetWidth;setTimeout(()=>b.classList.add('wiggle'),900);}
-function useDoor(d){sfx('door');flash=.8;const to=d.to;P.zone=to.zone;P.x=to.x-P.w/2;P.y=to.y-P.h;P.vx=0;P.vy=0;G.x=P.x-36;G.y=to.y-G.h;G.vy=0;L.doorLock=40;L.lockX=P.x;updCam(true);
+function useDoor(d){P.peakY=null;sfx('door');flash=.8;const to=d.to;P.zone=to.zone;P.x=to.x-P.w/2;P.y=to.y-P.h;P.vx=0;P.vy=0;G.x=P.x-36;G.y=to.y-G.h;G.vy=0;L.doorLock=40;L.lockX=P.x;updCam(true);
   if(d.secret){const first=!L.secrets[d.secret];L.secrets[d.secret]=1;sfx('secret');confetti(P.x,P.y-20,40);if(first){showBanner(d.title,d.sub,'#ff9fd6');L.showerAt=frame+80;}else startShower(false);}}
 
 function groundUnder(px,footY){const tx=Math.floor(px/T),ty=Math.floor((footY+4)/T);for(let y=ty;y<Math.min(ROWS,ty+3);y++){const c=tileAt(tx,y);if(solidC(c)||ONEWAY(c))return true;}return false;}
@@ -800,7 +802,7 @@ function groundUnder(px,footY){const tx=Math.floor(px/T),ty=Math.floor((footY+4)
 function goatAim(){const gx=P.x+P.w/2,gy=P.y+P.h;let best=null,bd=300;const cand=[];
   for(const e of L.ents)if(e.alive&&!e.saddle)cand.push([e.x+e.w/2,e.y+e.h]);
   if(L.chase==='on'&&!L.wf.hidden&&!P.mount)cand.push([L.wf.x+L.wf.w/2,L.wf.y+L.wf.h]);
-  if(P.zone===0&&looseHay())cand.push([(LV.hay.x+1)*T,(LV.hay.y+1)*T]);
+  if(P.zone===0)for(const h of L.hints)if(looseHay(h))cand.push([(h.need.x+1)*T,(h.need.y+1)*T]);
   for(const [x,y] of cand){const d=Math.abs(x-gx);if(d<bd&&Math.abs(y-gy)<100){bd=d;best=x;}}
   return best==null?P.face:(best<gx?-1:1);}
 function stepGoat(){
@@ -816,37 +818,58 @@ function stepGoat(){
     if(Math.abs(dx)>6){G.vx=Math.max(-9,Math.min(9,dx*.14));G.face=Math.sign(G.vx)||G.face;}else{G.vx*=.7;if(Math.abs(G.vx)<.2)G.face=P.face;}
     G.vy=Math.min(G.vy+.7,13);moveX(G);if(G.hitW&&G.onG)G.vy=-11;moveY(G);
     if(G.onG&&Math.abs(G.vx)>1&&Math.abs(dx)>40){const ax=G.vx>0?G.x+G.w+4:G.x-4;if(!groundUnder(ax,G.y+G.h))G.vy=-12;}
-    if(G.y>ROWS*T||Math.hypot(G.x-P.x,G.y-P.y)>360){const sp=P.safe||{x:P.x,y:P.y};G.x=sp.x+P.w/2-G.w/2;G.y=sp.y+P.h-G.h;G.vx=0;G.vy=0;if(frame-(G.lastPop||-999)>90){burst(G.x+G.w/2,G.y+G.h/2,'#fff',6);G.lastPop=frame;}}}
+    if(!P.climb&&(G.y>ROWS*T||Math.hypot(G.x-P.x,G.y-P.y)>360)){const sp=P.onG?{x:P.x,y:P.y}:P.safe||{x:P.x,y:P.y};G.x=sp.x+P.w/2-G.w/2;G.y=sp.y+P.h-G.h;G.vx=0;G.vy=0;if(frame-(G.lastPop||-999)>90){burst(G.x+G.w/2,G.y+G.h/2,'#fff',6);G.lastPop=frame;}}}
   G.anim+=Math.max(.15,Math.abs(G.vx)*.09);}
 
+const ladAt=(px,py)=>tileAt(Math.floor(px/T),Math.floor(py/T))==='L';
+// ladders: hold UP to climb, DOWN to climb down, JUMP to hop off
+function climbCheck(){const cx=P.x+P.w/2,body=ladAt(cx,P.y+P.h-3)||ladAt(cx,P.y+P.h*.5),top=P.onG&&!body&&ladAt(cx,P.y+P.h+4);
+  L.ladUp=body&&!P.climb;L.ladDown=top;
+  if(!P.climb){if((body&&inp.up)||(top&&pressed('down'))){if(P.ride)endGooseRide(false);P.climb=true;P.x=Math.floor(cx/T)*T+16-P.w/2;P.vx=0;P.vy=0;P.buf=0;P.jumping=false;if(top)P.y+=8;
+      if(!L.hinted.ladder){L.hinted.ladder=1;popText(isTouch?'Hold ⬆ to climb!':'Hold UP to climb!',cx,P.y-30,'#ffe9b8',true);}}else return false;}
+  L.ladUp=false;P.vx=0;P.vy=0;P.onG=false;P.coy=0;
+  if(pressed('jump')&&!inp.up){P.climb=false;P.vy=-11;P.jumping=true;P.peakY=null;sfx('jump');return true;}
+  if(pressed('left')||pressed('right')){P.climb=false;P.face=inp.left?-1:1;P.vx=P.face*2.5;return true;}
+  const v=(inp.up?-3.4:0)+(inp.down?3.4:0);P.y+=v;if(v){P.anim+=.2;if(frame%14===0)sfx('talk');}
+  const ft=P.y+P.h,tx=Math.floor(P.x+P.w/2)/T|0;
+  if(v<0&&!ladAt(cx,ft-1)){P.y=(Math.floor((ft-1)/T)+1)*T-P.h;P.climb=false;P.onG=true;P.landT=0;P.buf=0;P.noJump=true;}
+  else if(v>0&&solidC(tileAt(tx,Math.floor(ft/T)))){P.y=Math.floor(ft/T)*T-P.h;P.climb=false;P.onG=true;}
+  else if(v>0&&!ladAt(cx,ft-2)&&!ladAt(cx,P.y+P.h*.5))P.climb=false;
+  P.peakY=P.y;return true;}
 function stepPlay(){
   if(P.warp){stepWarp();stepGoat();return;}
   if(L.doorLock>0)L.doorLock--;
   if(P.mount){stepWaffles();updCam();return;}
-  const goL=inp.left&&!inp.right,goR=inp.right&&!inp.left,riding=!!P.ride;
+  const climbing=climbCheck();
+  const goL=!climbing&&inp.left&&!inp.right,goR=!climbing&&inp.right&&!inp.left,riding=!!P.ride;
   // running: quick start, and a turbo scurry after holding a direction
   if((goL||goR)&&P.onG)P.holdT++;else if(!(goL||goR))P.holdT=0;
   const turbo=P.holdT>60;if(turbo&&!P.turboOn){P.turboOn=true;popText('TURBO!',P.x+P.w/2,P.y-20,'#7fe3ff');sfx('whoosh');}if(!turbo)P.turboOn=false;
   const max=(riding?5.8:turbo?6.2:4.6)*(EASY()?.88:HARD()?1.12:1),acc=P.onG?.65:.45;
   if(goL){P.face=-1;P.vx=Math.max(P.vx-acc,-max);}else if(goR){P.face=1;P.vx=Math.min(P.vx+acc,max);}
   else{P.vx*=P.onG?.72:.94;if(Math.abs(P.vx)<.08)P.vx=0;}
+  if(!climbing){
   if(pressed('jump'))P.buf=8;else if(P.buf>0)P.buf--;
   if(P.onG)P.coy=7;else if(P.coy>0)P.coy--;
   const wasAir=!P.onG;
   // hold jump to keep bouncing
-  if((P.buf>0||(inp.jump&&P.onG&&P.landT>2))&&P.coy>0){P.vy=EASY()?-16.8:-16.4;P.buf=0;P.coy=0;P.jumping=true;P.sq=-1;sfx('jump');parts.push({kind:'dust',x:P.x+P.w/2,y:P.y+P.h,vx:0,vy:-.3,life:14});}
+  if(P.noJump&&!inp.jump)P.noJump=false;
+  if(!P.noJump&&(P.buf>0||(inp.jump&&P.onG&&P.landT>2))&&P.coy>0){P.vy=EASY()?-16.8:-16.4;P.buf=0;P.coy=0;P.jumping=true;P.sq=-1;sfx('jump');parts.push({kind:'dust',x:P.x+P.w/2,y:P.y+P.h,vx:0,vy:-.3,life:14});}
   else if(riding&&pressed('jump')&&!P.onG&&P.ride.flaps<4){P.ride.flaps++;P.vy=-9.5;sfx('flap');for(let i=0;i<3;i++)parts.push({kind:'feather',x:P.x+P.w/2,y:P.y+P.h-6,vx:(Math.random()-.5)*3,vy:Math.random()*2,life:40,r:Math.random()*6});}
   if(P.jumping&&!inp.jump&&P.vy<-7)P.vy=-7;if(P.vy>=0)P.jumping=false;
   const gUp=EASY()?1:.98,gDown=EASY()?1.15:HARD()?1.5:1.35;
   P.vy=Math.min(P.vy+(P.vy<0?gUp:gDown),EASY()?13:17);
   if(riding&&inp.jump&&P.vy>2.2)P.vy=2.2;
   moveX(P);moveY(P);
-  if(P.spring&&P.onG){const sp=P.spring;L.springA={tx:sp.tx,ty:sp.ty,t:12};P.vy=inp.jump?-24:-21;P.onG=false;P.jumping=false;P.coy=0;P.buf=0;P.sq=-1;P.chain=0;sfx('boing');parts.push({kind:'dust',x:P.x+P.w/2-8,y:P.y+P.h,vx:-1.5,vy:-.4,life:14},{kind:'dust',x:P.x+P.w/2+8,y:P.y+P.h,vx:1.5,vy:-.4,life:14});
+  if(P.spring&&P.onG){const sp=P.spring;L.springA={tx:sp.tx,ty:sp.ty,t:12};P.vy=inp.jump?-25:-22.5;P.onG=false;P.jumping=false;P.coy=0;P.buf=0;P.sq=-1;P.chain=0;P.peakY=P.y;sfx('boing');parts.push({kind:'dust',x:P.x+P.w/2-8,y:P.y+P.h,vx:-1.5,vy:-.4,life:14},{kind:'dust',x:P.x+P.w/2+8,y:P.y+P.h,vx:1.5,vy:-.4,life:14});
     if(!L.hinted.spring){L.hinted.spring=1;popText('BOING! Hold jump to go higher!',P.x+P.w/2,P.y-30,'#ffe9b8',true);}}
   if(L.springA&&--L.springA.t<=0)L.springA=null;
+  // long falls hurt in climbing levels (Normal and Hard)
+  if(!P.onG)P.peakY=P.peakY==null?P.y:Math.min(P.peakY,P.y);
+  else{if(wasAir&&LV.fallHurt&&!EASY()&&P.peakY!=null&&P.y-P.peakY>10.5*T&&!L.chase){popText('Ouch! Long fall!',P.x+P.w/2,P.y-30,'#ff9a6a',true);fallPit();return;}P.peakY=P.y;}
   if(P.onG){if(wasAir){P.sq=1;P.landT=0;P.chain=0;sfx('land');parts.push({kind:'dust',x:P.x+P.w/2-8,y:P.y+P.h,vx:-1,vy:-.4,life:14},{kind:'dust',x:P.x+P.w/2+8,y:P.y+P.h,vx:1,vy:-.4,life:14});if(riding)P.ride.flaps=0;}P.landT=(P.landT||0)+1;}
   if(P.sq>0)P.sq=Math.max(0,P.sq-.12);else if(P.sq<0)P.sq=Math.min(0,P.sq+.1);
-  if(P.bump)bumpTile(P.bump);
+  if(P.bump)bumpTile(P.bump);}
   if(L.bumpA&&--L.bumpA.t<=0)L.bumpA=null;
   if(P.onG){P.anim+=Math.abs(P.vx)*.09;if(turbo&&frame%3===0)parts.push({kind:'dust',x:P.x+P.w/2-P.face*10,y:P.y+P.h,vx:-P.face*1.5,vy:-.5,life:16});
     const fy=Math.floor((P.y+P.h)/T),ok=c=>solidC(c)||ONEWAY(c);if(ok(tileAt(Math.floor((P.x+2)/T),fy))&&ok(tileAt(Math.floor((P.x+P.w-2)/T),fy))&&!L.chase&&P.zone===0)P.safe={x:P.x,y:P.y};}
@@ -855,7 +878,7 @@ function stepPlay(){
   if(L.hudPop>0)L.hudPop--;
   if(L.showerAt&&frame>=L.showerAt){L.showerAt=0;if(P.zone>0)startShower(true);}
   if(L.shower){const sh=L.shower;sh.t++;if(P.zone!==sh.zone)L.shower=null;else{const z=ZONES[sh.zone];
-    if(sh.t<sh.dur&&sh.t%5===0)L.items.push({t:'reg',c:Math.floor(Math.random()*6),x:z.x0+2*T+Math.random()*(z.x1-z.x0-4*T),y:4*T+2,w:20,h:24,vx:(Math.random()-.5)*1.2,vy:.4+Math.random(),phys:true,grav:.05,maxv:2.3,age:99,life:540,ph:Math.random()*6});
+    if(sh.t<sh.dur&&sh.t%5===0)L.items.push({t:'reg',c:Math.floor(Math.random()*6),x:z.x0+2*T+Math.random()*(z.x1-z.x0-4*T),y:(z.y0||0)+4*T+2,w:20,h:24,vx:(Math.random()-.5)*1.2,vy:.4+Math.random(),phys:true,grav:.05,maxv:2.3,age:99,life:540,ph:Math.random()*6});
     if(sh.t<sh.dur&&sh.t%10===0)sfx('twinkle');if(sh.t>sh.dur+60)L.shower=null;}}
   if(riding){P.ride.t--;if(frame%4===0&&Math.abs(P.vx)>2)parts.push({kind:'dust',x:P.x+P.w/2-P.face*12,y:P.y+P.h,vx:-P.face,vy:-.4,life:14});if(P.ride.t<=0)endGooseRide(false);}
   if(P.y>ROWS*T+20){fallPit();return;}
@@ -871,10 +894,10 @@ function stepPlay(){
     if(L.near&&L.near.exit&&!L.hinted.down){L.hinted.down=1;popText(isTouch?'Press ⬇ to hop out!':'Press DOWN to hop out!',L.near.x,L.near.y-110,'#ffe9b8',true);}
     if(L.near&&!L.near.exit&&L.lockX==null){const n=L.near;L.near=null;if(n.kind==='door'){useDoor(n.d);return;}if(n.dir<0&&!L.dug[n.bw.x])L.dug[n.bw.x]=n.bw.ex;startWarp(n.bw,n.dir);return;}
     if(L.near&&pressed('down')){const n=L.near;L.near=null;if(n.kind==='door'){useDoor(n.d);return;}if(n.dir<0&&!L.dug[n.bw.x])L.dug[n.bw.x]=n.bw.ex;startWarp(n.bw,n.dir);return;}}
-  for(const h of L.hints)if(h.kind==='hen'&&!L.hinted.hen&&Math.abs(P.x-h.x)<170&&looseHay()){L.hinted.hen=1;}
+  for(const h of L.hints)if(h.kind==='hen'&&!L.hinted.hen&&Math.abs(P.x-h.x)<170&&looseHay(h)){L.hinted.hen=1;}
   stepGoat();
   if(L.runner){const r=L.runner;r.t++;r.x+=6;if(r.t===8)sfx('moo');if(r.x>cam.x+W/ZM+300)L.runner=null;}
-  for(const s of L.spawners){const dx=s.x-P.x;if(dx>90&&dx<800&&--s.cd<=0){s.cd=HARD()?160:EASY()?320:230;const sz=s.t==='bale'?30:26;L.ents.push(E(s.t||'pumpkin',s.x,s.y,sz,sz,{vx:EASY()?-1.3:HARD()?-2:-1.7}));}}
+  for(const s of L.spawners){const dx=s.x-P.x;if(dx>90&&dx<800&&Math.abs(s.y+30-(P.y+P.h))<120&&--s.cd<=0){s.cd=HARD()?160:EASY()?320:230;const sz=s.t==='bale'?30:26;L.ents.push(E(s.t||'pumpkin',s.x,s.y,sz,sz,{vx:EASY()?-1.3:HARD()?-2:-1.7}));}}
   for(const e of L.ents){if(!e.alive){e.dead++;continue;}
     if(e.t==='goose'&&(e.x<cam.x-300||e.x>cam.x+W/ZM+300))continue;
     e.t0++;if(e.honkT>0)e.honkT--;
@@ -906,21 +929,21 @@ function stepPlay(){
       else if(it.t==='heart'){P.hearts=Math.min(MAXH(),P.hearts+1);sfx('heart');burst(it.x+12,it.y+10,'#ff4f7a',8);}}}
   L.items=L.items.filter(i=>!i.got&&i.y<ROWS*T+40&&!(i.t==='junk'&&purse[i.kind]));
   for(const c of L.chests)if(!c.open&&P.zone===2&&Math.abs(P.x+P.w/2-c.x)<34){c.open=true;sfx('secret');spawnEggFountain(c.x,c.y-30,20);confetti(c.x,c.y-30,30);showBanner('TREASURE!','20 eggs!','#ffd23f');}
-  for(const c of L.checks){if(!c.on&&P.x+P.w/2>=c.x+10&&P.zone===0){c.on=true;L.check={x:c.x};P.hearts=MAXH();sfx('check');popText('Checkpoint! Hearts full!',c.x+16,GY-110,'#ffd23f');
-      burst(c.x+16,GY-60,'#ffe14d',14,'star');store.set('check',{w:lvlIdx,x:c.x,eggs:L.eggs});}}
+  for(const c of L.checks){const cy=c.y||GY;if(!c.on&&P.zone===0&&(c.y==null?P.x+P.w/2>=c.x+10:Math.abs(P.x+P.w/2-c.x-16)<40&&Math.abs(P.y+P.h-cy)<6)){c.on=true;L.check={x:c.x,y:c.y};P.hearts=MAXH();sfx('check');popText('Checkpoint! Hearts full!',c.x+16,cy-110,'#ffd23f');
+      burst(c.x+16,cy-60,'#ffe14d',14,'star');store.set('check',{w:lvlIdx,x:c.x,y:c.y,eggs:L.eggs});}}
   // the pen
-  if(!L.chase&&P.zone===0&&P.x>LV.penX*T){L.chase='intro';P.vx=0;if(P.ride)endGooseRide(false);for(let y=4;y<14;y++)L.g[y][LV.fenceX]='F';L.check={x:(LV.penX+1)*T};
+  if(!L.chase&&P.zone===0&&LV.penIn()){L.chase='intro';P.vx=0;if(P.ride)endGooseRide(false);for(let y=AY/T-10;y<AY/T;y++)L.g[y][LV.fenceX]='F';L.check={x:(LV.fenceX+2)*T,y:AY};
     runStory(LV.penStory,()=>{L.chase='on';setState('play');showBanner('RIDE WAFFLES!','Step 1: jump on his back','#ffd23f');},LV.penId);return;}
   if(L.chase==='on'){stepWaffles();if(state!=='play')return;}
   updCam();}
 
 function stepWaffles(){const wf=L.wf;wf.t++;const lo=ARL,hi=ARR;const spd=(EASY()?2.4:HARD()?4.4:3.2)+L.rides*.35+LV.cowBoost;
   if(wf.st==='ridden'){const Rd=L.rodeo;Rd.t++;wf.x+=wf.face*3;if(wf.x<lo+4){wf.x=lo+4;wf.face=1;}if(wf.x+wf.w>hi-4){wf.x=hi-4-wf.w;wf.face=-1;}
-    if(Rd.phase==='calm'){wf.y=GY-wf.h-Math.abs(Math.sin(wf.t*.12))*5;wf.rot=Math.sin(wf.t*.15)*.05;if(Rd.t>=Rd.wait){Rd.phase='warn';Rd.t=0;sfx('moo');}}
-    else if(Rd.phase==='warn'){wf.y=GY-wf.h;wf.rot=Math.sin(Rd.t*.6)*.06;
+    if(Rd.phase==='calm'){wf.y=AY-wf.h-Math.abs(Math.sin(wf.t*.12))*5;wf.rot=Math.sin(wf.t*.15)*.05;if(Rd.t>=Rd.wait){Rd.phase='warn';Rd.t=0;sfx('moo');}}
+    else if(Rd.phase==='warn'){wf.y=AY-wf.h;wf.rot=Math.sin(Rd.t*.6)*.06;
       if(pressed('jump')){Rd.phase='buck';Rd.t=0;Rd.ok++;sfx('yeehaw');popText(['Yeehaw!','Hang on!','Nice!'][Rd.ok%3],P.x+P.w/2,P.y-24,'#ffd23f',true);spawnEggFountain(wf.x+wf.w/2,wf.y,2);}
       else if(Rd.t>=Rd.win){throwOff(false);return;}}
-    else if(Rd.phase==='buck'){wf.y=GY-wf.h-Math.sin(Math.min(1,Rd.t/30)*Math.PI)*44;wf.rot=Math.sin(Rd.t*.45)*.32;
+    else if(Rd.phase==='buck'){wf.y=AY-wf.h-Math.sin(Math.min(1,Rd.t/30)*Math.PI)*44;wf.rot=Math.sin(Rd.t*.45)*.32;
       if(Rd.t>=30){if(Rd.ok>=3){throwOff(true);return;}Rd.phase='calm';Rd.t=0;Rd.wait=45+Math.floor(Math.random()*40);}}
     P.x=wf.x+wf.w/2-P.w/2;P.y=wf.y-P.h+10;P.face=wf.face;P.vx=0;P.vy=0;
     return;}
@@ -936,30 +959,47 @@ function stepWaffles(){const wf=L.wf;wf.t++;const lo=ARL,hi=ARR;const spd=(EASY(
     if(P.vy>0&&P.y+P.h-P.vy<=wf.y+16){if(L.mountLock>0){P.vy=-10;sfx('boing');return;}for(const e of L.ents)if(e.t==='bale'&&e.alive)killEnemy(e);P.mount='cow';wf.st='ridden';wf.t=0;L.rodeo={phase:'calm',t:0,wait:40,ok:0,win:EASY()?72:HARD()?34:50};sfx('yeehaw');shake=4;showBanner('YEEHAW!','Now tap JUMP every time you see TAP!','#ffffff');}
     else if(wf.st==='charge'||wf.st==='paw'||wf.st==='idle')hurt(wf.x+wf.w/2);}}
 function drawJumpOn(){const wf=L.wf;if(L.chase!=='on'||P.mount||wf.hidden)return;const b=Math.abs(Math.sin(frame*.12))*10,x=wf.x+wf.w/2,y=wf.y-58-b;ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.moveTo(x-12,y);ctx.lineTo(x+12,y);ctx.lineTo(x,y+16);ctx.closePath();ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle=OL;ctx.stroke();txt('Jump on!',x,y-14,13,'#fff',OL,4);}
-function throwOff(ok){const wf=L.wf;P.mount=null;wf.rot=0;wf.y=GY-wf.h;P.vy=-14;P.vx=-wf.face*3;P.inv=60;L.mountLock=80;shake=8;jumpGlow(false);
+function throwOff(ok){const wf=L.wf;P.mount=null;wf.rot=0;wf.y=AY-wf.h;P.vy=-14;P.vx=-wf.face*3;P.inv=60;L.mountLock=80;shake=8;jumpGlow(false);
   if(ok){L.rides++;wf.st='dizzy';wf.t=0;sfx('boing');confetti(P.x,P.y,24);if(L.rides>=3){startEscape();return;}showBanner('RIDE '+L.rides+' OF 3!','He’s getting tired…','#ffd23f');}
   else{wf.st='idle';wf.t=0;sfx('hurt');showBanner('BUCKED OFF!','Tap JUMP when you see TAP! Try again','#ff9a6a');}}
 function jumpGlow(on){const b=document.querySelector('.btn.big');if(b)b.classList.toggle('glow',on);}
 function bonkWall(){const wf=L.wf;wf.st='bonk';wf.t=0;shake=8;sfx('bonk');burst(wf.x+(wf.face>0?wf.w:0),wf.y+16,'#ffe14d',8,'star');wf.face=-wf.face;
-  if(LV.baleDrop&&!P.mount){const n=L.rides>=2&&!EASY()?2:1;for(let k=0;k<n;k++){const x=ARL+3*T+Math.random()*(ARR-ARL-6*T);L.ents.push(E('bale',x,2*T,30,30,{vx:(P.x>x?1:-1)*(EASY()?1.1:HARD()?2.1:1.6)}));}popText('Hay incoming!',P.x+P.w/2,P.y-40,'#ffe9b8',true);}}
+  if(LV.baleDrop&&!P.mount){const n=L.rides>=2&&!EASY()?2:1;for(let k=0;k<n;k++){const x=ARL+3*T+Math.random()*(ARR-ARL-6*T);L.ents.push(E('bale',x,AY-10*T,30,30,{vx:(P.x>x?1:-1)*(EASY()?1.1:HARD()?2.1:1.6)}));}popText('Hay incoming!',P.x+P.w/2,P.y-40,'#ffe9b8',true);}}
 function startEscape(){L.chase='escape';L.esc={t:0};setState('escape');P.vx=0;stopSong();}
-function stepEscape(){const e=L.esc,wf=L.wf,pk=L.giant;e.t++;
+// Level 2 finale: Waffles busts the wall, slides down the hay chute and runs out the barn doors
+function stepChute(){const e=L.esc,wf=L.wf,C=LV.chute;e.t++;
+  P.vx*=.7;P.vy=Math.min(P.vy+.8,13);moveX(P);moveY(P);
+  const smash=(col,y1,y2,yy)=>{for(let y=y1;y<y2;y++)L.g[y][col]=' ';sfx('crash');shake=12;for(let i=0;i<12;i++)parts.push({kind:'splinter',x:col*T+16,y:yy-20-Math.random()*90,vx:2+Math.random()*4,vy:-3-Math.random()*4,life:60});};
+  if(e.t===12){popText('Moo?',wf.x+wf.w/2,wf.y-30,'#fff');sfx('moo');}
+  if(!e.ph)e.ph='run';
+  if(e.ph==='run'){if(e.t>40){wf.st='walk';wf.face=1;wf.y=AY-wf.h;wf.x+=5;
+    if(!e.wall&&wf.x+wf.w>C.wall*T){e.wall=1;smash(C.wall,AY/T-10,AY/T,AY);popText('MOOOOO!',C.wall*T,AY-140,'#fff',true);}
+    if(wf.x+wf.w/2>=(C.x+1.5)*T){wf.x=(C.x+1.5)*T-wf.w/2;e.ph='fall';wf.vy=0;L.camFollow={x:0,y:0};sfx('whoosh');popText('WHEEEE!',wf.x+wf.w/2,wf.y-30,'#ffd23f',true);}}}
+  else if(e.ph==='fall'){wf.vy=Math.min(wf.vy+.4,14);wf.y+=wf.vy;wf.rot+=.12;if(frame%3===0)parts.push({kind:'straw',x:wf.x+wf.w/2+(Math.random()-.5)*60,y:wf.y,vx:(Math.random()-.5)*3,vy:-2,life:40,r:Math.random()*6});
+    if(frame%40===0)sfx('whoosh');if(wf.y+wf.h>=GY){wf.y=GY-wf.h;wf.rot=0;e.ph='out';shake=8;sfx('bonk');burst(wf.x+wf.w/2,GY,'#e8c45a',16);}}
+  else if(e.ph==='out'){wf.x+=6;wf.face=1;if(!e.door&&wf.x+wf.w>C.doors*T){e.door=1;smash(C.doors,GY/T-6,GY/T,GY);popText('MOOOOO!',C.doors*T,GY-140,'#fff',true);}
+    if(wf.x>(C.doors+3)*T&&!e.told){e.told=1;runStory(LV.escStory,()=>levelClear(),null);}}
+  if(L.camFollow)L.camFollow={x:Math.min(wf.x+wf.w/2,(C.doors+2)*T),y:wf.y+wf.h/2};
+  updCam();}
+function stepEscape(){if(LV.escape==='chute'){stepChute();return;}const e=L.esc,wf=L.wf,pk=L.giant;e.t++;
   P.vx*=.7;P.vy=Math.min(P.vy+.8,13);moveX(P);moveY(P);
   if(e.t===12){popText('Moo?',wf.x+wf.w/2,wf.y-30,'#fff');sfx('moo');}
-  if(e.t<75){wf.st='walk';wf.y=GY-wf.h;const tx=pk.x-wf.w/2;const d=tx-wf.x;wf.face=d>0?1:-1;if(Math.abs(d)>4)wf.x+=Math.sign(d)*3.5;}
+  if(e.t<75){wf.st='walk';wf.y=AY-wf.h;const tx=pk.x-wf.w/2;const d=tx-wf.x;wf.face=d>0?1:-1;if(Math.abs(d)>4)wf.x+=Math.sign(d)*3.5;}
   else if(e.t<95){wf.hop=(e.t-75)/20;}
   else{if(LV.escape==='bale'){wf.onBale=true;wf.hop=0;}else wf.hidden=true;pk.vx=Math.min(pk.vx+.15,7);pk.x+=pk.vx;pk.rot+=pk.vx/pk.r;
     if(!pk.crashed&&pk.x+pk.r>ARR){pk.crashed=true;for(let y=0;y<14;y++)L.g[y][LV.crashCol]=' ';sfx('crash');shake=14;
-      for(let i=0;i<14;i++)parts.push({kind:'splinter',x:ARR+16,y:GY-20-Math.random()*90,vx:2+Math.random()*5,vy:-3-Math.random()*4,life:60});popText('MOOOOO!',ARR-40,GY-140,'#fff',true);}}
+      for(let i=0;i<14;i++)parts.push({kind:'splinter',x:ARR+16,y:AY-20-Math.random()*90,vx:2+Math.random()*5,vy:-3-Math.random()*4,life:60});popText('MOOOOO!',ARR-40,AY-140,'#fff',true);}}
   if(e.t===205)runStory(LV.escStory,()=>levelClear(),null);
   updCam();}
 function levelClear(){setState('clear');sfx('fanfare');store.set('check',null);const done=store.get('cleared',[])||[];if(!done.includes(lvlIdx)){done.push(lvlIdx);store.set('cleared',done);}
   const best=store.get('bestEggs',{})||{};best[lvlIdx]=Math.max(best[lvlIdx]||0,L.eggs);store.set('bestEggs',best);confetti(W/2,H/2,60);}
 
 function updCam(snap){const chase=!!L.chase&&P.zone===0;const zt=chase?1:zoomBase();ZM=snap?zt:ZM+(zt-ZM)*.06;if(Math.abs(ZM-zt)<.002)ZM=zt;const VW=W/ZM,VH=H/ZM;
-  const z=ZONES[P.zone],zw=z.x1-z.x0;let ct=P.x+P.w/2-VW*.4+P.face*Math.min(50,Math.abs(P.vx)*8);if(chase)ct=z.x1-VW;
-  ct=zw<=VW?z.x0-(VW-zw)/2:Math.max(z.x0,Math.min(z.x1-VW,ct));cam.x=snap?ct:cam.x+(ct-cam.x)*.12;
-  const ty=P.warp&&P.warp.phase==='travel'?GY+60:P.y+P.h/2;const cy=Math.max(0,Math.min(H-VH,ty-VH*.58));cam.y=snap?cy:cam.y+(cy-cam.y)*.12;if(H-VH<=0)cam.y=0;}
+  const z=ZONES[P.zone],zw=z.x1-z.x0,zy0=z.y0||0,zy1=z.y1||ROWS*T,fo=L.camFollow;
+  const lt=!LV.vertical?0:P.climb?(inp.up?-90:inp.down?80:0):!P.onG?(P.vy<-3?-60:P.vy>5?90:0):0;L.lean=(L.lean||0)+(lt-(L.lean||0))*.05;
+  let ct=fo?fo.x-VW/2:P.x+P.w/2-VW*.4+P.face*Math.min(50,Math.abs(P.vx)*8);if(chase&&!fo)ct=ARR+T-VW;
+  ct=zw<=VW?z.x0-(VW-zw)/2:Math.max(z.x0,Math.min(z.x1-VW,ct));cam.x=snap?ct:cam.x+(ct-cam.x)*(fo?.2:.12);
+  const ty=fo?fo.y:P.warp&&P.warp.phase==='travel'?GY+60:P.y+P.h/2+L.lean;let cy=chase&&!fo?AY+2*T-VH:ty-VH*(fo?.5:.58);cy=zy1-zy0<=VH?zy0:Math.max(zy0,Math.min(zy1-VH,cy));cam.y=snap?cy:cam.y+(cy-cam.y)*(fo?.3:.12);}
 
 /* ---------------- story ---------------- */
 const INTRO=[
@@ -975,7 +1015,7 @@ const INTRO2=[
   {who:'Mom',text:'He’s going for the snacks.'},
   {who:'Hero',text:'Then we’re going up. Way up.'},
   {who:'Waffles',text:'MOOOO! (Hay is the best snack!)'},
-  {who:'Narrator',text:'Climb the hay, bounce on the red-striped springy bales, and look out for rolling hay!'}];
+  {who:'Narrator',text:'Climb all the way to the top of the barn! Ladders, springy bales, and look out for rolling hay!'}];
 const WHO_C={Narrator:'#6b6f80',Waffles:'#2a2426'};
 function speaker(w){if(w==='Hero')return hero().name;if(w==='Other')return hero().name==='Dad'?'Mom':'Dad';if(w==='Mom'&&hero().name==='Mom')return 'Dad';return w;}
 function runStory(lines,done,id){const seen=store.get('seen',{})||{};story={lines:lines.map(l=>({who:speaker(l.who),scene:l.scene||'level',text:l.text})),i:0,ch:0,done,id,skip:!!id};setState('story');}
@@ -1147,12 +1187,13 @@ function drawCard(){const gy=420;bgScreen(gy,stateT*3);fenceStrip(gy);groundStri
 /* ---------------- world ---------------- */
 function tileSpr(c,x,y){if(c==='#')return solidC(tileAt(x,y-1))?((x+y)%2?TILE.dirt:TILE.dirt2):TILE.grass;
   if(c==='S')return tileAt(x,y-1)==='S'?TILE.dirt:TILE.straw;
-  return {H:TILE.hay,B:TILE.hayB,'=':TILE.plank,'-':TILE.slab,F:TILE.wall,C:TILE.rock,J:TILE.spring,D:TILE.bdoor,K:TILE.corn,Z:TILE.metal}[c]||CRATE[c];}
+  return {H:TILE.hay,B:TILE.hayB,'=':TILE.plank,'-':TILE.slab,F:TILE.wall,C:TILE.rock,J:TILE.spring,D:TILE.bdoor,K:TILE.corn,Z:TILE.metal,L:TILE.ladder,W:TILE.loft}[c]||CRATE[c];}
 function drawTiles(){const c1=Math.max(0,Math.floor(cam.x/T)-1),c2=Math.min(L.w-1,Math.floor((cam.x+W/ZM)/T)+1);
-  for(let x=c1;x<=c2;x++)for(let y=0;y<ROWS;y++){const c=L.g[y][x];if(c===' '||c==='I')continue;let py=y*T;
+  const r1=Math.max(0,Math.floor(cam.y/T)-1),r2=Math.min(ROWS-1,Math.floor((cam.y+H/ZM)/T)+1);
+  for(let x=c1;x<=c2;x++)for(let y=r1;y<=r2;y++){const c=L.g[y][x];if(c===' '||c==='I')continue;let py=y*T;
     if(L.bumpA&&L.bumpA.tx===x&&L.bumpA.ty===y)py-=Math.sin(L.bumpA.t/8*Math.PI)*8;
     const s=tileSpr(c,x,y);if(c==='J'&&L.springA&&L.springA.tx===x&&L.springA.ty===y){const k=Math.sin(L.springA.t/12*Math.PI)*.3;ctx.drawImage(s,x*T-k*6,py+k*T,T+k*12,T*(1-k));continue;}
-    if(s)ctx.drawImage(s,x*T,py,T,T);if(c==='B'&&LV.crack&&x===LV.crack.x&&y===LV.crack.y)ctx.drawImage(CRACK,x*T,py,T,T);}}
+    if(s)ctx.drawImage(s,x*T,py,T,T);if(c==='B'&&L.cracks[x+','+y])ctx.drawImage(CRACK,x*T,py,T,T);}}
 function drawWorldFence(){const x0=Math.floor(cam.x/64)*64-64,x1=cam.x+W/ZM+64;
   for(let x=x0;x<x1;x+=64){const tx=Math.floor((x+4)/T);if(x<0||tx>=224||!solidC(tileAt(tx,14))||solidC(tileAt(tx,13))||!solidC(tileAt(tx+1,14)))continue;ctx.drawImage(FENCE,x,GY-44,64,44);}}
 function drawTunnels(){for(const bw of L.burrows){if(bw.kind!=='tunnel')continue;const d=L.dug[bw.x];if(!d)continue;const x1=Math.min(d,bw.ex);
@@ -1161,7 +1202,7 @@ function drawTunnels(){for(const bw of L.burrows){if(bw.kind!=='tunnel')continue
   ctx.strokeStyle='#6b4423';ctx.lineWidth=2;for(let x=bw.x+40;x<x1;x+=70){ctx.beginPath();ctx.moveTo(x,GY+40);ctx.quadraticCurveTo(x+6,GY+50,x-2,GY+58);ctx.stroke();}
   for(const j of bw.junk)if(x1>j.x&&!purse[j.kind])drawSpr(JUNK[j.kind],12,14,j.x+16,GY+84+(j.kind==='coin'?-2:0),1,1.2,1.2);
   if(x1>bw.x+300){ctx.fillStyle='#ff8fa8';for(let i=0;i<5;i++)ctx.fillRect(bw.x+320+i*4,GY+92+Math.round(Math.sin(frame*.2+i)*2),4,3);}}}
-function drawSignW(s){ctx.font=`800 11px ${FONT}`;const sw=Math.max(1,(ctx.measureText(s.text).width+20)/92);drawSpr(SIGNB,48,46,s.x,GY,1,sw,1);txt(s.text,s.x,GY-34,11,'#fff3d6',OL,3);}
+function drawSignW(s){ctx.font=`800 11px ${FONT}`;const sw=Math.max(1,(ctx.measureText(s.text).width+20)/92);drawSpr(SIGNB,48,46,s.x,s.y||GY,1,sw,1);txt(s.text,s.x,(s.y||GY)-34,11,'#fff3d6',OL,3);}
 function drawItem(it){const b=it.phys?0:Math.sin(frame*.08+(it.ph||0))*2;
   if(it.t==='egg'){const s=(Math.floor(it.x/T)%3===0)?eggB:eggS;ctx.drawImage(s,it.x+3,it.y+3+b,14,18);}
   else if(it.t==='gold'){const had=L.goldHad[it.k],cx=it.x+12,cy=it.y+14+b,pu=.5+.5*Math.sin(frame*.12);ctx.save();
@@ -1175,7 +1216,7 @@ function drawItem(it){const b=it.phys?0:Math.sin(frame*.08+(it.ph||0))*2;
     ctx.drawImage(RAINBOW[it.c],it.x+2,it.y,18,23);if(tw>.8){ctx.fillStyle='#fff';ctx.fillRect(it.x+14,it.y+2,3,3);}ctx.globalAlpha=1;}
   else if(it.t==='junk'){const g=.5+.5*Math.sin(frame*.1);ctx.fillStyle=`rgba(255,240,170,${.35*g+.1})`;ctx.beginPath();ctx.arc(it.x+13,it.y+12,20,0,7);ctx.fill();drawSpr(JUNK[it.kind],13,22,it.x+13,it.y+24+b,1,1.2,1.2);}
   else if(it.t==='heart')ctx.drawImage(heartS,it.x+3,it.y+2+(it.rise>0?0:b),20,19);}
-function personFrame(){if(L&&L.esc&&L.esc.t>200)return Math.floor(frame/12)%2?'cheer':'stand';if(!P.onG)return P.vy<0?'jump':'fall';
+function personFrame(){if(P.climb)return Math.floor(P.anim)%2?'cheer':'jump';if(L&&L.esc&&L.esc.t>200)return Math.floor(frame/12)%2?'cheer':'stand';if(!P.onG)return P.vy<0?'jump':'fall';
   if(Math.abs(P.vx)>.5)return ['run1','run2','run3','run4'][Math.floor(P.anim)%4];return 'stand';}
 function drawPlayer(){const p=hero(),cx=P.x+P.w/2,fy=P.y+P.h,ft=p.H+13;
   if(P.warp&&P.warp.phase==='travel'){const d=P.warp.dir;drawSpr(heroSpr(p,['run1','run2','run3','run4'][Math.floor(frame/6)%4],P.hat),22,ft,cx,GY+76,d,.85,.85);
@@ -1236,28 +1277,31 @@ function drawHUD(){const x=12,y=10,n=MAXH(),w=236+n*24+(P.hat?34:0);rr(x,y,w,50,
       else{jumpGlow(false);if(Rd.phase==='calm')txt('Get ready…',sx,sy,16,'#fff',OL,4);}}}
   if(banner){const k=Math.min(1,banner.t/10),out=banner.t>110?(banner.t-110)/20:0,s=(.6+.4*k)*(1-out*.3);ctx.save();ctx.globalAlpha=1-out;ctx.translate(W/2,H*.3);ctx.scale(s,s);
     ctx.shadowColor=banner.col;ctx.shadowBlur=24;txt(banner.text,0,0,48,banner.col,OL,9);ctx.shadowBlur=0;if(banner.sub)txt(banner.sub,0,44,20,'#fff',OL,5);ctx.restore();}}
+function drawChute(){const C=LV.chute,x=C.x*T,top=2*T;ctx.fillStyle='#4a2414';ctx.fillRect(x,top,3*T,GY-top);ctx.fillStyle='#5e3020';for(let y=top;y<GY;y+=40)ctx.fillRect(x,y,3*T,6);ctx.fillStyle='rgba(232,196,90,.25)';for(let y=top+20;y<GY;y+=90)ctx.fillRect(x+10,y,3*T-20,3);
+  txt('Hay chute',x+48,top+20,13,'#fff3d6',OL,3);const ox=LV.outside*T+T;const gr=ctx.createLinearGradient(0,GY-12*T,0,GY);gr.addColorStop(0,'#3ea8ff');gr.addColorStop(1,'#d4f1ff');ctx.fillStyle=gr;ctx.fillRect(ox,GY-14*T,8*T,14*T);
+  ctx.fillStyle='#8fd36f';ctx.fillRect(ox,GY-3*T,8*T,3*T);ctx.fillStyle='#ffd84a';ctx.beginPath();ctx.arc(ox+5*T,GY-10*T,22,0,7);ctx.fill();}
 function drawGiant(){const pk=L.giant;if(LV.escape==='bale'){ctx.save();ctx.translate(pk.x,pk.y-pk.r);ctx.rotate(pk.rot||0);ctx.drawImage(BIGBALE,-pk.r-1,-pk.r-1,pk.r*2+2,pk.r*2+2);ctx.restore();}else drawSpr(GIANT,50,88,pk.x,pk.y,1,1,1,pk.rot||0);}
 function drawHatch(d){const x=d.x,top=3*T,h=d.y-top;ctx.fillStyle='#2a160c';ctx.fillRect(x+4,top,56,h);ctx.fillStyle='#8a5326';ctx.fillRect(x+10,top,5,h);ctx.fillRect(x+49,top,5,h);for(let y=top+12;y<d.y;y+=18)ctx.fillRect(x+10,y,44,4);
   ctx.globalAlpha=.3+.12*Math.sin(frame*.05);ctx.fillStyle='#ffe9a8';ctx.fillRect(x+4,top,56,26);ctx.globalAlpha=1;txt('Hayloft ⬆',x+32,top-14,13,'#fff3d6',OL,3);}
 function drawWorld(){const z=ZONES[P.zone],gyS=(GY-cam.y)*ZM,main=P.zone===0;
-  ({out:()=>paintOutside(cam.x,gyS),barn:()=>paintBarn(cam.x,gyS),coop:()=>paintCoop(cam.x),loft:()=>paintLoft(cam.x),cave:()=>paintCave(cam.x),bin:()=>paintBin(cam.x)})[z.kind]();
+  ({out:()=>paintOutside(cam.x,gyS),barn:()=>paintBarn(cam.x,cam.y),coop:()=>paintCoop(cam.x),loft:()=>paintLoft(cam.x),cave:()=>paintCave(cam.x),bin:()=>paintBin(cam.x)})[z.kind]();
   ctx.imageSmoothingEnabled=true;ctx.drawImage(bgc,0,0,W,H);ctx.imageSmoothingEnabled=false;
   if(z.kind==='barn'){for(let i=0;i<28;i++){const x=wrap(i*83+frame*.12-cam.x*.15,W),y=wrap(i*57+frame*.08,H)+Math.sin(frame*.02+i)*6;ctx.globalAlpha=.2+.18*Math.sin(frame*.05+i);ctx.fillStyle='#fff3c4';ctx.fillRect(x,y,2.5,2.5);}ctx.globalAlpha=1;}
   if(!main)for(let i=0;i<26;i++){const x=wrap(i*97+frame*.25,W),y=wrap(i*61-frame*.35,H),tw=.5+.5*Math.sin(frame*.08+i);ctx.globalAlpha=.35+.5*tw;ctx.fillStyle=RCOL[i%6];const s2=2+tw*3;ctx.fillRect(x-s2/2,y-.75,s2,1.5);ctx.fillRect(x-.75,y-s2/2,1.5,s2);}ctx.globalAlpha=1;
   const sx=shake>0?(Math.random()-.5)*shake:0,sy=shake>0?(Math.random()-.5)*shake:0;
   ctx.save();ctx.translate(sx,sy);ctx.scale(ZM,ZM);ctx.translate(-cam.x,-cam.y);
   if(main){if(z.kind==='out')drawWorldFence();
-    for(const d of L.decor){if(d.kind==='coop')drawSpr(COOP,48,110,d.x+3.5*T,GY,1);else if(d.kind==='hatch')drawHatch(d);else drawSpr(PUMP[d.smashed?1:0],16,24,d.x,GY,1);}
+    for(const d of L.decor){if(d.kind==='coop')drawSpr(COOP,48,110,d.x+3.5*T,GY,1);else if(d.kind==='hatch')drawHatch(d);else if(d.kind==='ladderhint'){ctx.globalAlpha=.45;for(let y=d.y1;y<d.y2;y+=T)ctx.drawImage(TILE.ladder,d.x,y,T,T);ctx.globalAlpha=1;}else if(d.kind==='sdoor')drawSpr(DOOR,20,64,d.x+32,d.y,1);else if(d.kind==='chute')drawChute();else drawSpr(PUMP[d.smashed?1:0],16,24,d.x,GY,1);}
     for(const s of L.signs)drawSignW(s);
-    for(const c of L.checks)drawSpr(SCARE[c.on?1:0],20,76,c.x+16,GY,1);
-    if(L.chase||P.x>LV.showCow*T)drawGiant();}
+    for(const c of L.checks)drawSpr(SCARE[c.on?1:0],20,76,c.x+16,c.y||GY,1);
+    if(LV.escape==='pumpkin'&&(L.chase||P.x>LV.showCow*T))drawGiant();}
   if(P.zone===1)for(const h of L.hens){drawSpr(NEST,15,9,h.x+16,h.y+2,1);drawSpr(HEN,13,21,h.x+16,h.y-2+Math.round(Math.sin(frame*.1+h.x)*1),1);}
   if(!main)for(const d of L.doors)if(d.to.zone===0&&d.x>=z.x0&&d.x<z.x1){drawSpr(DOOR,20,64,d.x+32,d.y+d.h,1);txt('Exit',d.x+32,d.y+d.h-74,13,'#fff',OL,3);}
   if(P.zone===2){for(const c of L.chests)drawSpr(CHEST[c.open?1:0],22,36,c.x,GY,1);for(const bw of L.burrows)if(bw.exitOnly)txt('Exit',bw.x,bw.y-34,13,'#fff',OL,3);}
   drawTiles();drawTunnels();
   for(const h of L.hints){if(h.kind==='sparkle'&&frame%90<30){ctx.fillStyle='#fff7c2';ctx.fillRect(h.x-1+Math.sin(frame*.2)*6,h.y-1,3,3);}
-    if(h.kind==='hen'&&looseHay()){drawSpr(HEN,13,21,h.x+48,h.y+2+Math.round(Math.abs(Math.sin(frame*.05))*-6),1,.9,.9);
-      if(P.zone===0&&Math.abs(P.x-h.x)<420){const bx=h.x+64,by=h.y-62+Math.sin(frame*.08)*3,t1=h.t1||'Psst! This hay is loose…',t2=h.t2||'Headbutt it with 🐐!';ctx.font=`800 15px ${FONT}`;const bw=Math.max(ctx.measureText(t1).width,ctx.measureText(t2).width)+28;
+    if(h.kind==='hen'&&looseHay(h)){drawSpr(HEN,13,21,h.x+48,h.y+2+Math.round(Math.abs(Math.sin(frame*.05))*-6),1,.9,.9);
+      if(P.zone===0&&Math.abs(P.x-h.x)<420&&Math.abs(P.y-h.y)<300){let bx=h.x+64;const by=h.y-62+Math.sin(frame*.08)*3,t1=h.t1||'Psst! This hay is loose…',t2=h.t2||'Headbutt it with 🐐!';ctx.font=`800 15px ${FONT}`;const bw=Math.max(ctx.measureText(t1).width,ctx.measureText(t2).width)+28;bx=Math.max(z.x0+bw/2+T+6,Math.min(z.x1-bw/2-6,bx));
         rr(bx-bw/2,by-26,bw,52,14);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.stroke();ctx.beginPath();ctx.moveTo(bx-28,by+25);ctx.lineTo(bx-16,by+40);ctx.lineTo(bx-6,by+25);ctx.closePath();ctx.fillStyle='#fff';ctx.fill();ctx.stroke();ctx.fillRect(bx-27,by+22,20,4);
         txt(t1,bx,by-9,15,OL);txt(t2,bx,by+11,15,'#c4392d');}}}
   for(const bw of L.burrows){if((bw.exitOnly&&P.zone!==2)||(!bw.exitOnly&&P.zone!==0))continue;
@@ -1270,7 +1314,7 @@ function drawWorld(){const z=ZONES[P.zone],gyS=(GY-cam.y)*ZM,main=P.zone===0;
   if(L.runner)drawSpr(cowSpr(Math.floor(frame/4)%2?'walk1':'walk2'),52,75,L.runner.x,GY,1,.9,.9);
   if(P.zone===0&&(L.chase||P.x>LV.showCow*T)){drawWaffles();drawJumpOn();}
   drawFollower();drawPlayer();drawParts(false);
-  ctx.fillStyle='#120a06';ctx.fillRect(z.x0-3000,-500,3000,H+1000);ctx.fillRect(z.x1,-500,3000,H+1000);
+  ctx.fillStyle='#120a06';{const zy0=z.y0||0,zy1=z.y1||ROWS*T;ctx.fillRect(z.x0-3000,zy0-3000,3000,zy1-zy0+6000);ctx.fillRect(z.x1,zy0-3000,3000,zy1-zy0+6000);ctx.fillRect(z.x0,zy0-3000,z.x1-z.x0,3000);ctx.fillRect(z.x0,zy1,z.x1-z.x0,3000);}
   ctx.restore();
   if(flash>0){ctx.fillStyle=`rgba(255,255,255,${flash*.6})`;ctx.fillRect(0,0,W,H);}
   drawHUD();drawParts(true);}
@@ -1314,7 +1358,8 @@ function closePurse(){purseOpen=false;document.getElementById('purse').style.dis
 document.getElementById('purseB').onclick=e=>{e.stopPropagation();unlockAudio();openPurse();};
 document.getElementById('purseX').onclick=()=>closePurse();
 updPurseBadge();
-let downShown=false;function syncDown(){const want=isTouch&&state==='play'&&!gamePaused&&!!(L&&L.near);if(want!==downShown){downShown=want;const b=document.getElementById('downBtn');b.style.display=want?'flex':'none';if(!want){inp.down=false;b.classList.remove('on');}}}
+let upShown=false;function syncUp(){const want=isTouch&&state==='play'&&!gamePaused&&!!(L&&(L.ladUp||P.climb));if(want!==upShown){upShown=want;const b=document.getElementById('upBtn');b.style.display=want?'flex':'none';if(!want){inp.up=false;b.classList.remove('on');}}}
+let downShown=false;function syncDown(){syncUp();const want=isTouch&&state==='play'&&!gamePaused&&!!(L&&(L.near||L.ladDown||P.climb));if(want!==downShown){downShown=want;const b=document.getElementById('downBtn');b.style.display=want?'flex':'none';if(!want){inp.down=false;b.classList.remove('on');}}}
 let topShown=null;function updTop(){syncDown();const k=(state==='title'?'':'h')+(PLAYISH.includes(state)?'p':'');if(k===topShown)return;topShown=k;
   document.getElementById('homeB').style.display=k.includes('h')?'':'none';document.getElementById('pauseB').style.display=k.includes('p')?'':'none';}
 let last=performance.now(),acc=0;
