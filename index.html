@@ -80,7 +80,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.47';
+const VERSION='0.48';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -724,11 +724,11 @@ function buildW2(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank}=kit(124,'
   b.chests.push({x:112*T,y:GY,open:false});b.items.push({t:'junk',kind:'shades',x:117*T,y:GY-26,w:26,h:24});
   b.burrows.push({x:120*T+16,y:GY,kind:'room',to:{zone:0,x:28*T+16,y:34*T},exitOnly:true});
   return b;}
-/* Level 3: Creek Crossing. Rocks, floating logs, jumping fish, a waterfall secret, and a raft chase */
+/* Level 3: Creek Crossing. Rocks, bridges, jumping fish, a waterfall secret, and a raft chase */
 function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,ground}=kit(418,'#');
   b.logs=[];
   const rock=(x,top)=>fill(x,x+1,top,ROWS-1,'C');
-  const log=(x0,x1,sp)=>b.logs.push({x:x0*T,x0:x0*T,x1:x1*T,y:GY+2,w:96,h:16,vx:sp||1.1});
+  const bridge=(x0,x1)=>{fill(x0,x1,14,14,'=');b.posts=b.posts||[];for(let x=x0;x<=x1;x+=4)b.posts.push(x*T);b.posts.push((x1+1)*T-6);};
   const fish=(x,w)=>b.ents.push(E('fish',x*T,GY+40,26,16,{wait:w||60,hide:true}));
   ground(0,20);sign(2,'Creek Crossing');eggs(5,13,4);g[11][9]='X';g[11][10]='M';g[11][11]='Q';eggs(9,9,3);goose(16);
   // first creek: hop the rock
@@ -737,10 +737,10 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   b.burrows.push({x:31*T+16,y:GY,kind:'tunnel',ex:47*T+16,dug:0,junk:[{x:34*T,kind:'sneaker'},{x:38*T,kind:'truck'},{x:42*T,kind:'coin'}]});
   block(36,37,12,'C');eggs(36,11,2);goose(44);
   // ride a floating log across
-  log(51,63,1.1);fish(57,40);arc(52,10,10,2.5);
+  bridge(51,62);fish(55,40);fish(59,110);arc(52,10,10,2.5);
   ground(63,80);b.checks.push({x:66*T,on:false});g[11][70]='X';g[11][71]='R';eggs(70,9,2);goose(77,{saddle:true,vx:-.5});eggs(73,13,4);
   // the wide river: ride the goose, or hop log to log
-  log(81,91,1.3);log(90,101,-1.2);fish(86,20);fish(95,100);arc(82,8,18,3);gold(91,4,0);
+  bridge(81,100);fish(85,20);fish(91,90);fish(96,150);arc(82,8,18,3);gold(91,4,0);
   ground(101,120);eggs(104,13,6);goose(110);goose(116);g[11][113]='I';b.hints.push({x:113*T+16,y:11*T+16,kind:'sparkle'});
   // stepping stones
   rock(122,12);rock(125,11);rock(128,12);eggs(122,10,2);eggs(125,9,2);eggs(128,10,2);fish(124,70);
@@ -750,19 +750,19 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   b.decor.push({kind:'falls',x:142*T,y1:0,y2:9*T});b.hints.push({x:143*T,y:8*T,kind:'sparkle'});
   b.doors.push({x:142*T,y:7*T,w:64,h:64,to:{zone:1,x:346*T,y:GY},secret:'falls',title:'BEHIND THE WATERFALL!',sub:'A hidden cave full of eggs'});
   eggs(145,8,2);b.checks.push({x:155*T,on:false});eggs(150,13,4);
-  rock(163,12);log(165,177,1.2);fish(170,50);arc(161,10,16,2.5);
+  rock(163,12);bridge(165,176);fish(168,50);fish(173,120);arc(161,10,16,2.5);
   ground(177,214);
   // a rocky hill with Dill's secret burrow on top
   block(182,183,12,'C');block(185,186,10,'C');plank(187,192,8);eggs(187,7,3);
   b.burrows.push({x:190*T+16,y:8*T,kind:'room',to:{zone:2,x:384*T,y:GY},secret:'shack',calm:true,title:'SECRET FISHING SHACK!',sub:'Nice and quiet in here…'});
   goose(198);goose(204);eggs(196,13,6);g[11][200]='X';g[11][201]='M';sign(208,'Rapids ahead!');
   // THE RAFT CHASE: the screen scrolls; keep up across rocks, islands and logs
-  rock(216,13);rock(219,13);rock(222,13);rock(225,13);rock(228,13);ground(231,235);rock(238,13);log(240,250,1.2);ground(251,254);
-  rock(257,13);rock(260,13);rock(263,13);log(265,276,1.3);ground(277,281);
-  rock(284,13);rock(287,13);rock(290,13);log(292,303,1.2);ground(304,307);rock(310,13);rock(313,13);rock(316,13);
+  rock(216,13);rock(219,13);rock(222,13);rock(225,13);rock(228,13);ground(231,235);rock(238,13);bridge(240,250);ground(251,254);
+  rock(257,13);rock(260,13);rock(263,13);bridge(265,276);ground(277,281);
+  rock(284,13);rock(287,13);rock(290,13);bridge(292,303);ground(304,307);rock(310,13);rock(313,13);rock(316,13);
   ground(319,340);sign(321,'Corn maze ➜');b.decor.push({kind:'finish',x:323*T});b.decor.push({kind:'dam',x:317*T});b.decor.push({kind:'corn',x:326*T});
   arc(216,10,13,1.5);arc(232,11,4,1.5);arc(257,10,8,1.5);arc(284,10,8,1.5);eggs(305,12,3);
-  fish(234,30);fish(272,60);fish(298,90);
+  fish(245,30);fish(270,60);fish(297,90);
   // secret room 1 (busy): the cave behind the waterfall
   fill(343,378,0,3,'C');fill(343,343,0,13,'C');fill(378,378,0,13,'C');fill(343,378,14,ROWS-1,'C');
   plank(348,352,10);plank(355,360,7);plank(363,367,10);plank(370,373,7);
@@ -821,7 +821,7 @@ function showBanner(text,sub,col){banner={text,sub,col:col||'#ffd23f',t:0};}
 function loadLevel(i,fromCheck){lvlIdx=i;LV=LEVELS[i];ROWS=LV.rows;GY=LV.gy*T;AY=LV.arenaRow*T;ZONES=LV.zones;ARL=LV.arena[0]*T;ARR=LV.arena[1]*T;const b=LV.build();
   if(EASY()&&LV.easyFill)for(let x=1;x<(LV.easyTo||LV.fenceX);x++)if(b.g[14][x]===' ')for(let y=14;y<ROWS;y++)b.g[y][x]=LV.floor;
   L={w:b.w,g:b.g,items:b.items,ents:b.ents,spawners:b.spawners,decor:b.decor,signs:b.signs,burrows:b.burrows,checks:b.checks,doors:b.doors,chests:b.chests,hens:b.hens,hints:b.hints,
-     bumpA:null,eggs:0,chase:null,reveal:b.reveal||[],logs:b.logs||[],raft:LV.boss==='chase'?{x:222*T,y:GY+2,w:120,h:16,vx:0,surge:0,bob:0}:null,scrollX:0,tagCool:0,camFollow:null,lean:0,giant:{x:LV.giantX*T,y:AY,r:LV.escape==='bale'?46:44,rot:0,vx:0},springA:null,runner:{x:9*T,t:0},hinted:{},combo:0,comboT:0,bestCombo:0,secrets:{},multi:{},rides:0,dug:{}};
+     bumpA:null,eggs:0,chase:null,reveal:b.reveal||[],logs:b.logs||[],posts:b.posts||[],raft:LV.boss==='chase'?{x:222*T,y:GY+2,w:120,h:16,vx:0,surge:0,bob:0}:null,scrollX:0,tagCool:0,camFollow:null,lean:0,giant:{x:LV.giantX*T,y:AY,r:LV.escape==='bale'?46:44,rot:0,vx:0},springA:null,runner:{x:9*T,t:0},hinted:{},combo:0,comboT:0,bestCombo:0,secrets:{},multi:{},rides:0,dug:{}};
   const saved=(store.get('gold',{})||{})[i]||[0,0,0];L.goldHad=saved.slice();L.gold=[0,0,0];
   if(HARD())for(const e of L.ents)if(!e.saddle)e.vx*=1.4;
   if(EASY()){L.ents=L.ents.filter((e,k)=>e.saddle||k%3!==2);for(const e of L.ents)e.vx*=.6;}
@@ -869,6 +869,9 @@ function unduck(){if(P.crouch){P.h+=P.crouch;P.y-=P.crouch;P.crouch=0;}}
 // Easy/Normal: a fish knocks you back and knocks up to 3 eggs loose (grab them back). Hard: it costs a heart.
 function fishBump(e){if(P.inv>0||P.mount||P.warp)return;const away=(P.x+P.w/2<e.x+e.w/2)?-1:1;P.inv=90;P.vy=-7;P.vx=away*4;sfx('splash');shake=4;
   const n=Math.min(3,L.eggs);L.eggs-=n;for(let k=0;k<n;k++)L.items.push({t:'egg',x:P.x+P.w/2-10,y:P.y-6,w:20,h:24,vx:away*(1+k*1.2),vy:-6-k,phys:true,age:0});burst(P.x+P.w/2,P.y+10,'#bfe6ff',10);}
+function splashBack(){unduck();P.peakY=null;P.climb=false;if(P.ride)endGooseRide(true);sfx('splash');shake=3;
+  if(HARD()){if(P.hat){P.hat=false;sfx('hatoff');}else{P.hearts--;sfx('hurt');}if(P.hearts<=0){setState('oneMore');stopSong();return;}}
+  L.boing={t:0,n:40,x0:P.x,y0:GY-P.h+10,x1:P.safe.x,y1:P.safe.y};P.vx=P.vy=0;}
 function fallPit(){unduck();P.peakY=null;P.climb=false;if(P.ride)endGooseRide(true);if(P.hat){P.hat=false;sfx('hatoff');}else if(!EASY()){P.hearts--;sfx('hurt');}
   if(P.hearts<=0){setState('oneMore');stopSong();return;}
   P.x=P.safe.x;P.y=P.safe.y;P.vx=P.vy=0;P.inv=90;G.x=P.x-30;G.y=P.y+P.h-G.h;G.vy=0;burst(P.x+P.w/2,P.y+P.h,'#fff',8);updCam(true);}
@@ -977,6 +980,8 @@ function stepDuck(){const want=inp.down&&P.onG&&!P.climb&&!P.ride&&!P.mount&&!P.
   else if(!want&&P.crouch){const dh=P.crouch;P.crouch=0;P.h+=dh;P.y-=dh;}}
 function stepPlay(){
   if(P.warp){stepWarp();stepGoat();return;}
+  if(L.boing){const b=L.boing;b.t++;const k=b.t/b.n;P.x=b.x0+(b.x1-b.x0)*k;P.y=b.y0+(b.y1-b.y0)*k-Math.sin(k*Math.PI)*110;P.vx=P.vy=0;P.onG=false;if(b.x1!==b.x0)P.face=b.x1>b.x0?1:-1;if(frame%3===0)parts.push({kind:'dust',x:P.x+P.w/2,y:P.y+P.h,vx:0,vy:.5,life:14});
+    if(b.t>=b.n){L.boing=null;P.x=b.x1;P.y=b.y1;P.onG=true;P.inv=Math.max(P.inv,45);burst(P.x+P.w/2,P.y+P.h,'#bfe6ff',8);}stepGoat();updCam();return;}
   for(const lg of L.logs){lg.x+=lg.vx;if(lg.x<lg.x0){lg.x=lg.x0;lg.vx=-lg.vx;}if(lg.x+lg.w>lg.x1){lg.x=lg.x1-lg.w;lg.vx=-lg.vx;}if(P.onLog===lg)P.x+=lg.vx;if(G.onLog===lg)G.x+=lg.vx;}
   if(L.doorLock>0)L.doorLock--;
   if(P.mount){stepWaffles();updCam();return;}
@@ -1022,7 +1027,7 @@ function stepPlay(){
     if(sh.t<sh.dur&&sh.t%5===0)L.items.push({t:'reg',c:Math.floor(Math.random()*6),x:z.x0+2*T+Math.random()*(z.x1-z.x0-4*T),y:(z.y0||0)+4*T+2,w:20,h:24,vx:(Math.random()-.5)*1.2,vy:.4+Math.random(),phys:true,grav:.05,maxv:2.3,age:99,life:540,ph:Math.random()*6});
     if(sh.t<sh.dur&&sh.t%10===0)sfx('twinkle');if(sh.t>sh.dur+60)L.shower=null;}}
   if(riding){P.ride.t--;if(frame%4===0&&Math.abs(P.vx)>2)parts.push({kind:'dust',x:P.x+P.w/2-P.face*12,y:P.y+P.h,vx:-P.face,vy:-.4,life:14});if(P.ride.t<=0)endGooseRide(false);}
-  if(LV.water&&P.zone===0&&!P.onLog&&P.y+P.h>GY+20&&L.g[14][Math.floor((P.x+P.w/2)/T)]===' '){splashAt(P.x+P.w/2);if(L.chase==='on'&&LV.boss==='chase')chaseFall();else fallPit();return;}
+  if(LV.water&&P.zone===0&&!P.onLog&&P.y+P.h>GY+20&&L.g[14][Math.floor((P.x+P.w/2)/T)]===' '){splashAt(P.x+P.w/2);if(L.chase==='on'&&LV.boss==='chase')chaseFall();else splashBack();return;}
   if(P.y>ROWS*T+20){fallPit();return;}
   if(state!=='play')return;
   // Dill's burrows and secret doors: stand on one and press DOWN
@@ -1049,7 +1054,7 @@ function stepPlay(){
       if(e.y>ROWS*T+40)e.gone=true;}
     else if(e.t==='fish'){if(e.home==null){e.home=e.x;e.dir=((e.home/T)|0)%2?1:-1;e.period=130+((e.home/T)|0)%3*25;}
       // each fish leaps on its own steady rhythm, alternating direction, in the same arc every time
-      if(e.hide){e.y=GY+40;e.x=e.home;if(--e.wait<=0){e.hide=false;e.y=GY+14;e.vy=-10.5;e.grav=.42;let sp=2.1;const water=x=>L.g[14][Math.floor(x/T)]===' ';while(sp>.4&&!water(e.home+13+e.dir*sp*50))sp-=.3;e.vx=e.dir*sp;e.dir=-e.dir;if(Math.abs(e.home-P.x)<500)sfx('splash');}continue;}
+      if(e.hide){e.y=GY+40;e.x=e.home;if(--e.wait<=0){e.hide=false;e.y=GY+14;e.vy=-10.5;e.grav=.42;let sp=2.1;const water=x=>{const c=L.g[14][Math.floor(x/T)];return c===' '||c==='=';};while(sp>.4&&!water(e.home+13+e.dir*sp*50))sp-=.3;e.vx=e.dir*sp;e.dir=-e.dir;if(Math.abs(e.home-P.x)<500)sfx('splash');}continue;}
       e.vy+=e.grav;e.y+=e.vy;e.x+=e.vx;e.rot=e.vy*.07;if(e.vy>0&&e.y>GY+14){e.hide=true;e.wait=e.period-40;e.x=e.home+e.vx*0;continue;}}
     else if(e.t==='pumpkin'||e.t==='bale'){e.vy=Math.min(e.vy+.5,10);moveX(e);if(e.hitW){killEnemy(e);continue;}moveY(e);e.rot+=e.vx/13;if(e.y>ROWS*T+40)e.gone=true;}
     if(G.mode==='dash'&&!e.saddle&&overlap(G,e)){killEnemy(e);sfx('bonk');popText(e.t==='goose'?'BONK!':e.t==='bale'?'POOF!':'SPLAT!',e.x+e.w/2,e.y-10,'#fff');addEgg(1);continue;}
@@ -1058,7 +1063,7 @@ function stepPlay(){
       if(riding){killEnemy(e);P.vy=Math.min(P.vy,-6);addEgg(1);continue;}
       if(P.vy>0&&P.y+P.h-P.vy<=e.y+12){killEnemy(e);P.vy=inp.jump?-12:-9;P.jumping=inp.jump;sfx('stomp');P.chain++;
         if(P.chain>=2){const words=['','','DOUBLE!','TRIPLE!','QUAD!'];popText((words[P.chain]||'MEGA!')+' +'+P.chain,P.x+P.w/2,P.y-26,'#7fe3ff',true);for(let k=0;k<P.chain;k++)addEgg(1);}else addEgg(1);continue;}
-      if(e.t==='fish'&&((P.onG&&!P.onLog)||e.y+e.h>GY-20))continue;
+      if(e.t==='fish'&&((P.onG&&!P.onLog&&L.g[14][Math.floor((P.x+P.w/2)/T)]!=='=')||e.y+e.h>GY-20))continue;
       if(e.t==='fish'&&!HARD()){fishBump(e);continue;}
       hurt(e.x+e.w/2);if(state!=='play')return;}}
   L.ents=L.ents.filter(e=>!e.gone&&!(!e.alive&&e.dead>40));
@@ -1129,9 +1134,9 @@ function drawRaft(){const R=L.raft;if(!R)return;const y=R.y+(R.bob||0);ctx.drawI
   if(!L.wf.offRaft){drawSpr(cowSpr(L.chase==='on'&&Math.floor(frame/20)%2?'walk1':'stand'),52,75,R.x+R.w/2,y,1,.9,.9);
     if(L.chase==='on'&&L.tagCool<=0){const b=Math.abs(Math.sin(frame*.12))*8,x=R.x+R.w/2,yy=y-96-b;ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.moveTo(x-12,yy);ctx.lineTo(x+12,yy);ctx.lineTo(x,yy+16);ctx.closePath();ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle=OL;ctx.stroke();}}}
 function drawLogs(){for(const lg of L.logs)ctx.drawImage(LOGP,lg.x,lg.y-2+Math.sin(frame*.07+lg.x0)*1.5,lg.w,16);}
-function drawWater(){const c1=Math.max(0,Math.floor(cam.x/T)-1),c2=Math.min(L.w-1,Math.floor((cam.x+W/ZM)/T)+1),sy=GY+10;
-  for(let x=c1;x<=c2;x++){if(L.g[14][x]!==' ')continue;const gr=ctx.createLinearGradient(0,sy,0,ROWS*T);gr.addColorStop(0,'rgba(64,170,230,.9)');gr.addColorStop(1,'rgba(18,64,120,.97)');ctx.fillStyle=gr;ctx.fillRect(x*T,sy,T,ROWS*T-sy+4);
-    const o=(frame*.6+x*13)%32;ctx.fillStyle='rgba(225,247,255,.9)';ctx.fillRect(x*T+o*.5,sy,10,2);ctx.fillStyle='rgba(255,255,255,.3)';ctx.fillRect(x*T+((o*1.3+11)%26),sy+12+Math.sin(frame*.05+x)*2,6,2);}}
+function drawWater(){const c1=Math.max(0,Math.floor(cam.x/T)-1),c2=Math.min(L.w-1,Math.floor((cam.x+W/ZM)/T)+1);
+  for(let x=c1;x<=c2;x++){const br=L.g[14][x]==='=';if(L.g[14][x]!==' '&&!br)continue;const sy=br?GY+15:GY+10;const gr=ctx.createLinearGradient(0,sy,0,ROWS*T);gr.addColorStop(0,'rgba(64,170,230,.9)');gr.addColorStop(1,'rgba(18,64,120,.97)');ctx.fillStyle=gr;ctx.fillRect(x*T,sy,T,ROWS*T-sy+4);
+    const o=(frame*.6+x*13)%32;ctx.fillStyle='rgba(225,247,255,.9)';ctx.fillRect(x*T+o*.5,sy,10,2);ctx.fillStyle='rgba(255,255,255,.3)';ctx.fillRect(x*T+((o*1.3+11)%26),sy+12+Math.sin(frame*.05+x)*2,6,2);}for(const px of L.posts)if(px>cam.x-64&&px<cam.x+W/ZM+64){ctx.fillStyle='#4a2e14';ctx.fillRect(px,GY+14,8,ROWS*T-GY);ctx.fillStyle='#7a4a24';ctx.fillRect(px+2,GY+14,3,ROWS*T-GY);}}
 function drawFalls(d){const x=d.x,y1=d.y1,y2=d.y2;ctx.fillStyle='#5d4a40';ctx.fillRect(x-24,y1,112,y2-y1);ctx.fillStyle='#4a3a32';ctx.fillRect(x-24,y1,10,y2-y1);ctx.fillRect(x+78,y1,10,y2-y1);
   const gr=ctx.createLinearGradient(x,0,x+64,0);gr.addColorStop(0,'rgba(150,215,250,.92)');gr.addColorStop(.5,'rgba(230,248,255,.96)');gr.addColorStop(1,'rgba(140,205,245,.92)');ctx.fillStyle=gr;ctx.fillRect(x,y1,64,y2-y1);
   ctx.fillStyle='rgba(255,255,255,.85)';for(let i=0;i<9;i++){const yy=y1+((frame*5+i*53)%(y2-y1));ctx.fillRect(x+4+(i*7)%54,yy,3,16);}
@@ -1216,7 +1221,7 @@ const INTRO3=[
   {who:'Mom',text:'That cow does whatever he wants.'},
   {who:'Hero',text:'Then we’re crossing the creek. Watch out for the jumping fish.'},
   {who:'Henry',text:'MOO. (Fish are not my friends.)'},
-  {who:'Narrator',text:'Hop the rocks, ride the logs, and find what’s hiding behind the waterfall!'}];
+  {who:'Narrator',text:'Hop the rocks, cross the bridges, duck the fish, and find what’s hiding behind the waterfall!'}];
 const INTRO2=[
   {who:'Narrator',text:'Henry and his pumpkin rolled right into the big red barn.'},
   {who:'Dad',text:'The barn. Where we keep all the hay. And the snacks.'},
