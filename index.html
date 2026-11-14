@@ -80,7 +80,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.56';
+const VERSION='0.57';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search);
 /* =========================================================
@@ -1562,7 +1562,7 @@ function playWorld(i){store.set('check',null);startSong('menu');const lv=LEVELS[
 function resumeInfo(){const ck=store.get('check',null);if(ck&&LEVELS[ck.w])return {w:ck.w,ck:true};
   let w=store.get('lastLvl',0)|0;if(!worldOpen(w))w=0;const done=store.get('cleared',[])||[];if(done.includes(w)&&worldOpen(w+1))w++;return {w,ck:false};}
 function continueGame(){const ri=resumeInfo();startSong();startWorld(ri.w,ri.ck);}
-const MAPARROWS=()=>[{x:22,y:H-110,w:88,h:88,d:-1},{x:124,y:H-110,w:88,h:88,d:1}];
+const MAPARROWS=()=>[{x:14,y:H-96,w:84,h:84,d:-1},{x:W-98,y:H-96,w:84,h:84,d:1}];
 function mapStep(d){for(let i=mapSel+d;i>=0&&i<LEVELS.length;i+=d)if(worldOpen(i)){mapSel=i;sfx('egg');return;}sfx('bump');}
 /* ---------------- farm map (world select) ---------------- */
 let mapSel=0,mapMsg=null;
@@ -1576,7 +1576,7 @@ function mapNodes(){const n=CHAPTER.length,sp=Math.min(184,(W-90)/n),x0=W/2-sp*(
 const MAPPLAY=()=>({x:W/2-150,y:H-78,w:300,h:62});
 function stepMap(){if(mapMsg&&--mapMsg.t<=0)mapMsg=null;if(stateT<15)return;
   if(tap){if(inR(tap,BACKR())){goTitle();return;}
-    for(const n of mapNodes())if(Math.hypot(tap.x-n.x,tap.y-n.y)<n.r+16){if(worldOpen(n.i)){mapSel=n.i;sfx('egg');mapGo(n.i);}else{sfx('bump');mapMsg={i:n.i,t:110};}return;}
+    for(const n of mapNodes())if(Math.hypot(tap.x-n.x,tap.y-n.y)<n.r+16){if(worldOpen(n.i)){if(mapSel!==n.i){mapSel=n.i;sfx('egg');}}else{sfx('bump');mapMsg={i:n.i,t:110};}return;}
     for(const a of MAPARROWS())if(inR(tap,a)){mapStep(a.d);return;}
     if(savedIn(mapSel)&&inR(tap,MAPOVER())){playWorld(mapSel);return;}
     if(inR(tap,MAPPLAY())){mapGo(mapSel);return;}}
@@ -1615,7 +1615,7 @@ function drawMap(){nightBackdrop(H-104);
   if(cowAt){const bb=Math.abs(Math.sin(frame*.08))*6;drawSpr(cowSpr(Math.floor(frame/10)%2?'walk1':'stand'),52,75,cowAt.x-cowAt.r-24,cowAt.y+24-bb,-1,.6,.6);}
   if(worldOpen(mapSel)){const pr=MAPPLAY(),pu=1+Math.sin(frame*.1)*.025;ctx.save();ctx.translate(pr.x+pr.w/2,pr.y+pr.h/2);ctx.scale(pu,pu);ctx.translate(-pr.x-pr.w/2,-pr.y-pr.h/2);neoBtn(pr,(savedIn(mapSel)?'▶ CONTINUE ':'▶ PLAY ')+CHAPTER[mapSel].toUpperCase(),'#ff3d6e',false,22,true);ctx.restore();if(savedIn(mapSel))neoBtn(MAPOVER(),'START OVER','#b4a8d0',false,15);}
   if(mapMsg){const n=ns[mapMsg.i],t=(mapMsg.i<LEVELS.length?'FINISH '+CHAPTER[mapMsg.i-1]+' FIRST':'COMING SOON').toUpperCase();ctx.font=`${FW} 15px ${FONT}`;const tw=ctx.measureText(t).width+30;rr(n.x-tw/2,n.y-n.r-48,tw,32,8);ctx.fillStyle='#12081f';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#ffc53d';ctx.stroke();txt(t,n.x,n.y-n.r-32,15,'#ffc53d');}
-  for(const a of MAPARROWS()){const cx=a.x+a.w/2,cy=a.y+a.h/2,d=a.d,pu=Math.sin(frame*.12)*3*d;ctx.beginPath();ctx.moveTo(cx+d*18+pu,cy);ctx.lineTo(cx-d*14+pu,cy-22);ctx.lineTo(cx-d*14+pu,cy+22);ctx.closePath();ctx.fillStyle='#12c6d9';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#12081f';ctx.stroke();}
+  for(const a of MAPARROWS()){const cx=a.x+a.w/2,cy=a.y+a.h/2,d=a.d,pu=Math.sin(frame*.12)*3*d;ctx.beginPath();ctx.arc(cx,cy,a.w/2,0,7);ctx.fillStyle='rgba(16,8,34,.7)';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='rgba(18,198,217,.8)';ctx.stroke();ctx.beginPath();ctx.moveTo(cx+d*18+pu,cy);ctx.lineTo(cx-d*14+pu,cy-22);ctx.lineTo(cx-d*14+pu,cy+22);ctx.closePath();ctx.fillStyle='#12c6d9';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#12081f';ctx.stroke();}
   neoBtn(BACKR(),'◀ HOME','#12c6d9',false,18);ctx.fillStyle=scanPat();ctx.fillRect(0,0,W,H);}
 function startWorld(i,fromCheck){store.set('lastLvl',i);loadLevel(i,fromCheck);setState('card');startSong('level');}
 function goTitle(){jumpGlow(false);story=null;resumeGame(true);setState('title');startSong('menu');banner=null;}
