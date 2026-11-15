@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Philalack Farms</title>
+<title>Holy Cow!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
 <style>
@@ -87,14 +87,14 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <input id="friendIn" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Their name"><p id="friendErr"></p>
 <div class="fr"><button id="friendNo">Cancel</button><button id="friendOk" class="go">Let’s go!</button></div></div></div>
 <div id="purse"><div class="hp"><button id="purseX2" aria-label="Close">✕</button><h1>👜 Mom’s Purse</h1><p id="purseSub"></p><div id="purseGrid"></div><button id="purseX">◀ Back</button></div></div>
-<div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
+<div id="rotate">🔄<br>Turn your device sideways<br>to play Holy Cow!</div>
 <script>
 'use strict';
-const VERSION='0.84';
+const VERSION='0.87';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search)||!/github\.io$/.test(location.hostname);
 /* =========================================================
-   PHILALACK FARMS: Catch Henry!
+   HOLY COW! From the farm to the stars
    Built on the Super Noah engine (physics, controls, audio).
    All art is original pixel art drawn in code.
    ========================================================= */
@@ -2118,7 +2118,7 @@ function drawWho(){const hz=H-104;nightBackdrop(hz);logoText('WHO’S PLAYING?',
 const WHOBADGE=()=>({x:16,y:82,w:190,h:52});
 function drawWhoBadge(){const r=WHOBADGE(),k=12;ctx.save();ctx.beginPath();ctx.moveTo(r.x+k,r.y);ctx.lineTo(r.x+r.w,r.y);ctx.lineTo(r.x+r.w-k,r.y+r.h);ctx.lineTo(r.x,r.y+r.h);ctx.closePath();ctx.fillStyle='rgba(16,8,34,.88)';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#12c6d9';ctx.stroke();ctx.clip();
   const fam=FAM.find(p=>p.name===WHO);if(fam){const sc=40/(fam.H+13)*1.5;drawSpr(heroSpr(fam,'stand',false),22,fam.H+13,r.x+34,r.y+r.h+8,1,sc,sc);}else friendFace(WHO,r.x+34,r.y+r.h/2,15);ctx.restore();
-  txt('PLAYER',r.x+58,r.y+15,11,'#12c6d9','#12081f',3,'left');const nm=WHO.toUpperCase();txt(nm,r.x+58,r.y+34,fitSz(nm,19,96),'#fff','#12081f',4,'left');
+  txt('WHO’S PLAYING',r.x+58,r.y+15,fitSz('WHO’S PLAYING',11,104),'#12c6d9','#12081f',3,'left');const nm=WHO.toUpperCase();txt(nm,r.x+58,r.y+34,fitSz(nm,19,96),'#fff','#12081f',4,'left');
   txt('⇄',r.x+r.w-26,r.y+r.h/2,20,'#12c6d9','#12081f',3);}
 const SB_URL='https://zghpmysqcywzzarahras.supabase.co',SB_KEY='sb_publishable_AsuLILWamUfqc-B6tPB-4w_lIGlISvv',GAME_ID='philalack';
 const SB_H={'apikey':SB_KEY,'Content-Type':'application/json'};
@@ -2207,12 +2207,12 @@ function drawTitle(){const hz=HORIZ;
   const ph=(frame*.012)%1;for(let k=0;k<9;k++){const t=(k+ph)/9,y=hz+(H-hz)*t*t;ctx.moveTo(0,y);ctx.lineTo(W,y);}ctx.stroke();
   ctx.fillStyle='#ff8a3d';ctx.fillRect(0,hz-1,W,2);
   // logo
-  {const ts=fitSz('PHILALACK',86,Math.min(780,W-120)),ty=60;ctx.save();ctx.translate(W/2,ty);ctx.transform(1,0,-.14,1,0,0);ctx.font=`${FW} ${ts}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
-   ctx.fillStyle='#ff3d6e';ctx.fillText('PHILALACK',7,7);ctx.lineWidth=12;ctx.strokeStyle='#12081f';ctx.strokeText('PHILALACK',0,0);
-   const lg=ctx.createLinearGradient(0,-ts*.45,0,ts*.4);lg.addColorStop(0,'#fff6c8');lg.addColorStop(.45,'#ffc53d');lg.addColorStop(.55,'#ff8a1f');lg.addColorStop(1,'#ff5a1f');ctx.fillStyle=lg;ctx.fillText('PHILALACK',0,0);
-   ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.strokeText('PHILALACK',0,-2);ctx.restore();
+  {const ts=fitSz('HOLY COW!',86,Math.min(780,W-120)),ty=60;ctx.save();ctx.translate(W/2,ty);ctx.transform(1,0,-.14,1,0,0);ctx.font=`${FW} ${ts}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+   ctx.fillStyle='#ff3d6e';ctx.fillText('HOLY COW!',7,7);ctx.lineWidth=12;ctx.strokeStyle='#12081f';ctx.strokeText('HOLY COW!',0,0);
+   const lg=ctx.createLinearGradient(0,-ts*.45,0,ts*.4);lg.addColorStop(0,'#fff6c8');lg.addColorStop(.45,'#ffc53d');lg.addColorStop(.55,'#ff8a1f');lg.addColorStop(1,'#ff5a1f');ctx.fillStyle=lg;ctx.fillText('HOLY COW!',0,0);
+   ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.strokeText('HOLY COW!',0,-2);ctx.restore();
    const rw=360,rx=W/2-rw/2,ry=106,k=10;ctx.beginPath();ctx.moveTo(rx+k,ry);ctx.lineTo(rx+rw,ry);ctx.lineTo(rx+rw-k,ry+30);ctx.lineTo(rx,ry+30);ctx.closePath();ctx.fillStyle='#12c6d9';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#12081f';ctx.stroke();
-   txt('FARMS  ·  HENRY’S ON THE RUN',W/2,ry+16,fitSz('FARMS  ·  HENRY’S ON THE RUN',18,rw-40),'#12081f');}
+   txt('FROM THE FARM TO THE STARS',W/2,ry+16,fitSz('FROM THE FARM TO THE STARS',18,rw-40),'#12081f');}
   // big hero showcase on a spotlight
   const hp=FAM.find(p=>p.name===heroName)||FAM[0],sx=SHOWX(),fy=hz+4;
   {const sg=ctx.createRadialGradient(sx,fy,4,sx,fy,110);sg.addColorStop(0,'rgba(18,198,217,.65)');sg.addColorStop(1,'rgba(18,198,217,0)');ctx.fillStyle=sg;ctx.save();ctx.translate(sx,fy);ctx.scale(1,.28);ctx.beginPath();ctx.arc(0,0,110,0,7);ctx.fill();ctx.restore();
@@ -2220,7 +2220,7 @@ function drawTitle(){const hz=HORIZ;
    const sc=Math.min(3.1,178/(hp.H+13)),bob=Math.round(Math.sin(frame*.08)*2);drawSpr(heroSpr(hp,Math.floor(frame/24)%3===2?'cheer':'stand',false),22,hp.H+13,sx,fy+bob*0,1,sc,sc);}
   for(const a of HEROARROWS()){const cx=a.x+a.w/2,cy=a.y+a.h/2,d=a.d,pu=Math.sin(frame*.12)*3*d;ctx.beginPath();ctx.arc(cx,cy,a.w/2,0,7);ctx.fillStyle='rgba(16,8,34,.7)';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='rgba(18,198,217,.8)';ctx.stroke();ctx.beginPath();ctx.moveTo(cx+d*18+pu,cy);ctx.lineTo(cx-d*12+pu,cy-20);ctx.lineTo(cx-d*12+pu,cy+20);ctx.closePath();ctx.fillStyle='#12c6d9';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#12081f';ctx.stroke();}
   // name plate
-  {const x0=W/2+18;txt('PLAYING AS',x0,182,15,'#12c6d9','#12081f',4,'left');const nm=hp.name.toUpperCase();txt(nm,x0,226,fitSz(nm,56,330),'#fff','#12081f',8,'left');
+  {const x0=W/2+18;txt('CHARACTER',x0,182,15,'#12c6d9','#12081f',4,'left');const nm=hp.name.toUpperCase();txt(nm,x0,226,fitSz(nm,56,330),'#fff','#12081f',8,'left');
    txt(HERO_TAG[hp.name]||'',x0+2,266,20,'#ffc53d','#12081f',5,'left');txt('DIFFICULTY',x0,290,13,'rgba(255,255,255,.7)','#12081f',3,'left');}
   const b=titleButtons();for(const m of b.modes)neoBtn(m,m.lab,m.col,MODE===m.m,16);
   // roster tiles
