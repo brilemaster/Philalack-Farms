@@ -47,7 +47,9 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 #friendIn{font:400 26px "Russo One","Arial Black",system-ui,sans-serif;text-align:center;width:100%;box-sizing:border-box;padding:10px;border-radius:12px;border:3px solid #12c6d9;background:#07030f;color:#fff;outline:none;text-transform:uppercase}
 #friend .fr{display:flex;gap:10px;width:100%}#friend button{flex:1;font:400 19px "Russo One","Arial Black",system-ui,sans-serif;color:#fff;border:3px solid #fff;border-radius:14px;padding:10px;min-height:52px;background:#2a1a4a}#friend button.go{background:#ff3d6e}
 #purse h1{margin:0;font-size:30px;color:#8a4a1c}#purse p{margin:0;font:700 16px system-ui;color:#5a4a3e;text-align:center}
-#purseGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;width:100%}
+#purseGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;width:100%;flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:2px;touch-action:pan-y}
+#purse,#purse .hp{touch-action:pan-y}#purse .hp{position:relative;max-height:100%;box-sizing:border-box}#purse #purseX2{position:absolute;max-width:none;min-height:0;box-shadow:none;margin:0;top:10px;right:12px;width:46px!important;height:46px;flex:none;border-radius:50%;border:3px solid #2a1a12;background:#c4392d;color:#fff;font:400 22px system-ui;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+#purseX{flex:none}
 .pi{background:#fff;border:3px solid #e2c79a;border-radius:16px;padding:8px 10px;display:flex;gap:10px;align-items:center}
 .pi img{width:52px;height:52px;object-fit:contain;image-rendering:pixelated;flex:none}.pi b{display:block;font-size:15px;color:#2a1a12}.pi small{display:block;font:600 12px system-ui;color:#6a5d52;line-height:1.3}
 .pi.no{opacity:.6;border-style:dashed}.pi.no img{filter:brightness(0) opacity(.35)}
@@ -84,11 +86,11 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="friend"><div class="fb"><h1>+ ADD A FRIEND</h1><p>First name only. It shows on the leaderboard.</p>
 <input id="friendIn" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Their name"><p id="friendErr"></p>
 <div class="fr"><button id="friendNo">Cancel</button><button id="friendOk" class="go">Let’s go!</button></div></div></div>
-<div id="purse"><div class="hp"><h1>👜 Mom’s Purse</h1><p id="purseSub"></p><div id="purseGrid"></div><button id="purseX">◀ Back</button></div></div>
+<div id="purse"><div class="hp"><button id="purseX2" aria-label="Close">✕</button><h1>👜 Mom’s Purse</h1><p id="purseSub"></p><div id="purseGrid"></div><button id="purseX">◀ Back</button></div></div>
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Philalack Farms!</div>
 <script>
 'use strict';
-const VERSION='0.83';
+const VERSION='0.84';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search)||!/github\.io$/.test(location.hostname);
 /* =========================================================
@@ -106,7 +108,7 @@ function fit(){const vv=window.visualViewport,vw=Math.round((vv&&vv.width)||inne
 let fitReq=0;function fitSoon(){if(!fitReq)fitReq=requestAnimationFrame(()=>{fitReq=0;fit();});}
 addEventListener('resize',fitSoon);if(window.visualViewport)visualViewport.addEventListener('resize',fitSoon);addEventListener('orientationchange',()=>setTimeout(()=>{lastFit='';fit();},300));setInterval(fitSoon,1000);fit();
 const zoomBase=()=>PHONE?1.6:1.3;
-document.addEventListener('touchmove',e=>{if(!(e.target.closest&&e.target.closest('#pm,#friend')))e.preventDefault();},{passive:false});
+document.addEventListener('touchmove',e=>{if(!(e.target.closest&&e.target.closest('#pm,#friend,#purse')))e.preventDefault();},{passive:false});
 ['gesturestart','gesturechange','dblclick'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
 
 /* ---------------- saving (on this device only) ---------------- */
@@ -2581,7 +2583,8 @@ function openPurse(){if(purseOpen)return;purseOpen=true;purseWasPaused=gamePause
   document.getElementById('purse').style.display='flex';}
 function closePurse(){purseOpen=false;document.getElementById('purse').style.display='none';if(!purseWasPaused){gamePaused=false;for(const k in inp)inp[k]=false;tap=null;try{if(actx&&!document.hidden)actx.resume();}catch(e){}}}
 document.getElementById('purseB').onclick=e=>{e.stopPropagation();unlockAudio();openPurse();};
-document.getElementById('purseX').onclick=()=>closePurse();
+document.getElementById('purseX').onclick=()=>closePurse();document.getElementById('purseX2').onclick=()=>closePurse();
+document.getElementById('purse').addEventListener('click',e=>{if(e.target.id==='purse')closePurse();});
 document.getElementById('friendOk').onclick=()=>addFriend();
 document.getElementById('friendNo').onclick=()=>{closeFriendBox();sfx('egg');};
 document.getElementById('friendIn').addEventListener('input',()=>{document.getElementById('friendErr').textContent='';});
