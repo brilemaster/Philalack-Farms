@@ -90,7 +90,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Holy Cow!</div>
 <script>
 'use strict';
-const VERSION='0.89';
+const VERSION='0.90';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search)||!/github\.io$/.test(location.hostname);
 /* =========================================================
@@ -765,20 +765,20 @@ function buildW1(){
   // main farm path
   ground(0,26);ground(30,58);ground(62,140);ground(144,176);ground(181,255);
   sign(3,'Catch Henry!');eggs(6,13,5);
-  g[9][12]='X';g[9][13]='M';g[9][14]='Q';eggs(12,7,3);
+  g[11][12]='X';g[11][13]='M';g[11][14]='Q';eggs(12,9,3);
   g[11][18]='I';b.hints.push({x:18*T+16,y:11*T+16,kind:'sparkle'});
   goose(22);arc(24,12,7,2.6);
   sign(31,'Headbutt geese!');
   block(36,38,12);block(39,41,11);eggs(36,11,3);eggs(39,10,3);goose(46);goose(52);arc(56,12,7,2.6);
   // goose-ride runway
   sign(63,'Ride a goose!');goose(67,{saddle:true,vx:-.5});
-  arc(66,7,12,3);plank(74,77,9);eggs(74,8,4);gold(79,4,0);g[9][70]='X';g[9][71]='R';
+  arc(66,7,12,3);plank(74,77,9);eggs(74,8,4);gold(79,4,0);g[11][70]='X';g[11][71]='R';
   // Dill's tunnel
   sign(81,'Dirt hole? Press DOWN!');
   b.burrows.push({x:84*T+16,y:GY,kind:'tunnel',ex:106*T+16,dug:0,junk:[{x:88*T,kind:'boot'},{x:91*T,kind:'remote'},{x:94*T,kind:'keys'},{x:98*T,kind:'bone'},{x:102*T,kind:'coin'}]});
   block(88,89,12);block(90,92,9);eggs(90,8,3);goose(97);goose(101);
   b.checks.push({x:110*T,on:false});
-  eggs(113,13,6);g[9][118]='X';g[9][119]='M';g[9][120]='X';
+  eggs(113,13,6);g[11][118]='X';g[11][119]='M';g[11][120]='X';
   // the secret chicken coop, hidden behind loose hay
   b.decor.push({kind:'coop',x:124*T,y:GY});block(126,129,11,'B');
   b.doors.push({x:127*T,y:12*T,w:64,h:64,to:{zone:1,x:351*T,y:GY},need:{x:127,y:13},secret:'coop',title:'SECRET COOP!',sub:'The hens have been hiding eggs'});
@@ -786,7 +786,7 @@ function buildW1(){
   for(const [x,s] of [[108,1],[112,0],[116,1],[122,1],[134,0],[137,1]])b.decor.push({kind:'pumpkin',x:x*T+16,smashed:!!s});
   b.spawners.push({x:139*T,y:GY-26,cd:40});arc(139,12,6,2.6);
   // planks
-  plank(150,153,10);plank(156,159,7);eggs(150,9,4);eggs(156,6,4);g[9][164]='X';g[9][165]='M';goose(162);goose(170);
+  plank(150,153,10);plank(156,159,7);eggs(150,9,4);eggs(156,6,4);g[11][164]='X';g[11][165]='M';goose(162);goose(170);
   b.spawners.push({x:174*T,y:GY-26,cd:80});arc(175,12,7,2.8);
   // second goose ride, and a secret burrow up high
   arc(188,11,8,2);
@@ -794,15 +794,15 @@ function buildW1(){
   b.burrows.push({x:202*T+16,y:8*T,kind:'room',to:{zone:2,x:389*T,y:GY},secret:'cave',title:'SECRET CAVE!',sub:'A hidden treasure cave!'});
   g[11][210]='I';b.hints.push({x:210*T+16,y:11*T+16,kind:'sparkle'});eggs(205,13,8);goose(214);
   // the back forty: past the pen and out across the pumpkin field
-  sign(219,'Henry went this way!');eggs(222,13,4);g[9][226]='X';g[9][227]='M';g[9][228]='X';eggs(226,7,3);goose(232);
+  sign(219,'Henry went this way!');eggs(222,13,4);g[11][226]='X';g[11][227]='M';g[11][228]='X';eggs(226,9,3);goose(232);
   block(236,237,12);block(239,240,10);plank(242,246,8);eggs(242,7,5);block(248,249,12);eggs(248,11,2);
   b.spawners.push({x:254*T,y:GY-26,cd:60});arc(251,12,6,2.6);
   for(const [x,sm] of [[230,0],[245,1],[258,0],[284,1],[318,0]])b.decor.push({kind:'pumpkin',x:x*T+16,smashed:!!sm});
-  ground(256,262);ground(266,290);arc(262,11,5,2.4);goose(270);goose(276);g[9][280]='X';g[9][281]='Q';g[9][282]='X';eggs(280,7,3);
+  ground(256,262);ground(266,290);arc(262,11,5,2.4);goose(270);goose(276);g[11][280]='X';g[11][281]='Q';g[11][282]='X';eggs(280,9,3);
   b.checks.push({x:272*T,on:false});
   plank(289,292,11);plank(294,297,9);eggs(289,10,4);eggs(294,8,4);
   ground(298,345);arc(306,11,8,2);plank(312,316,8);eggs(312,7,5);g[11][309]='I';b.hints.push({x:309*T+16,y:11*T+16,kind:'sparkle'});
-  b.spawners.push({x:330*T,y:GY-26,cd:80});eggs(318,13,6);g[9][322]='X';g[9][323]='M';arc(326,12,6,2.6);
+  b.spawners.push({x:330*T,y:GY-26,cd:80});eggs(318,13,6);g[11][322]='X';g[11][323]='M';arc(326,12,6,2.6);
   sign(334,'Henry ➜ the barn');b.decor.push({kind:'finish',x:336*T});
   // secret room 1: chicken coop (enter on the left, exit door far right)
   fill(348,383,0,3,'F');fill(348,348,0,13,'F');fill(383,383,0,13,'F');fill(348,383,14,ROWS-1,'S');
@@ -885,7 +885,7 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   const rock=(x,top)=>fill(x,x+1,top,ROWS-1,'C');
   const bridge=(x0,x1)=>{fill(x0,x1,14,14,'=');b.posts=b.posts||[];for(let x=x0;x<=x1;x+=4)b.posts.push(x*T);b.posts.push((x1+1)*T-6);};
   const fish=(x,w)=>b.ents.push(E('fish',x*T,GY+40,26,16,{wait:w||60,hide:true}));
-  ground(0,20);sign(2,'Creek Crossing');eggs(5,13,4);g[9][9]='X';g[9][10]='M';g[9][11]='Q';eggs(9,7,3);goose(16);
+  ground(0,20);sign(2,'Creek Crossing');eggs(5,13,4);g[11][9]='X';g[11][10]='M';g[11][11]='Q';eggs(9,9,3);goose(16);
   // first creek: hop the rock
   rock(23,12);arc(21,11,6,2);
   ground(27,50);sign(28,'Dirt hole? Press DOWN!');
@@ -893,7 +893,7 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   block(36,37,12,'C');eggs(36,11,2);goose(44);
   // ride a floating log across
   bridge(51,62);fish(55,40);fish(59,110);arc(52,10,10,2.5);
-  ground(63,80);b.checks.push({x:66*T,on:false});g[9][70]='X';g[9][71]='R';eggs(70,7,2);goose(77,{saddle:true,vx:-.5});eggs(73,13,4);
+  ground(63,80);b.checks.push({x:66*T,on:false});g[11][70]='X';g[11][71]='R';eggs(70,9,2);goose(77,{saddle:true,vx:-.5});eggs(73,13,4);
   // the wide river: ride the goose, or hop log to log
   bridge(81,100);fish(85,20);fish(91,90);fish(96,150);arc(82,8,18,3);gold(91,4,0);
   ground(101,120);eggs(104,13,6);goose(110);goose(116);g[11][113]='I';b.hints.push({x:113*T+16,y:11*T+16,kind:'sparkle'});
@@ -910,7 +910,7 @@ function buildW3(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   // a rocky hill with Dill's secret burrow on top
   block(182,183,12,'C');block(185,186,10,'C');plank(187,192,8);eggs(187,7,3);
   b.burrows.push({x:190*T+16,y:8*T,kind:'room',to:{zone:2,x:384*T,y:GY},secret:'shack',calm:true,title:'SECRET FISHING SHACK!',sub:'Nice and quiet in here…'});
-  goose(198);goose(204);eggs(196,13,6);g[9][200]='X';g[9][201]='M';sign(208,'Rapids ahead!');
+  goose(198);goose(204);eggs(196,13,6);g[11][200]='X';g[11][201]='M';sign(208,'Rapids ahead!');
   // THE RAFT CHASE: the screen scrolls; keep up across rocks, islands and logs
   rock(216,13);rock(219,13);rock(222,13);rock(225,13);rock(228,13);ground(231,235);rock(238,13);bridge(240,250);ground(251,254);
   rock(257,13);rock(260,13);rock(263,13);bridge(265,276);ground(277,281);
@@ -1567,7 +1567,7 @@ function breakHay(tx,ty){const seen=new Set(),st=[[tx,ty]];let n=0;
 /* ---------- goose ride ---------- */
 function startGooseRide(e){unduck();e.gone=true;P.ride={t:EASY()?600:480,flaps:0};P.y-=20;P.h+=20;P.vy=-6;sfx('honk');setTimeout(()=>sfx('yeehaw'),150);
   showBanner('GOOSE RIDE!','Tap jump in the air to flap','#ffffff');}
-function endGooseRide(hit){if(!P.ride)return;P.ride=null;P.h-=20;P.y+=20;sfx('honk');
+function endGooseRide(hit){if(!P.ride)return;unduck();P.ride=null;P.h-=20;P.y+=20;sfx('honk');
   parts.push({kind:'flygoose',x:P.x+P.w/2,y:P.y+P.h,vx:P.face*2,vy:-3,life:90,face:P.face});
   popText(hit?'Goose bailed!':'Bye, goose!',P.x+P.w/2,P.y-20,'#fff');}
 /* ---------- Dill's burrows and secret doors ---------- */
@@ -1642,8 +1642,12 @@ function climbCheck(){const cx=P.x+P.w/2,body=ladAt(cx,P.y+P.h-3)||ladAt(cx,P.y+
   else if(v>0&&solidC(tileAt(tx,Math.floor(ft/T)))){P.y=Math.floor(ft/T)*T-P.h;P.climb=false;P.onG=true;}
   else if(v>0&&!ladAt(cx,ft-2)&&!ladAt(cx,P.y+P.h*.5))P.climb=false;
   P.peakY=P.y;return true;}
-function stepDuck(){const want=inp.down&&P.onG&&!P.climb&&!P.ride&&!P.mount&&!P.warp&&!L.near&&!L.ladDown&&!L.chase;
-  if(want&&!P.crouch){const dh=Math.round(P.h*.5);P.crouch=dh;P.h-=dh;P.y+=dh;}
+function rideLowNeeded(){const full=P.h+P.crouch,top=P.y+P.h-full-6,bot=P.y+P.h-full+Math.round((full-20)*.5)+2;
+  for(let x=Math.floor((P.x-34)/T);x<=Math.floor((P.x+P.w+34)/T);x++)for(let y=Math.floor(top/T);y<=Math.floor(bot/T);y++){if(y>=0&&solidC(tileAt(x,y)))return true;}return false;}
+let TALLH=0;function jumpK(){if(!TALLH)TALLH=Math.max(...FAM.map(f=>Math.max(24,Math.round(f.H*.82))));const ph=P.h+(P.crouch||0)-(P.ride?20:0);return Math.sqrt(1.07+Math.max(0,TALLH-ph)/137);}
+function stepDuck(){const rideLow=!!P.ride&&!P.warp&&rideLowNeeded();P.rideLow=rideLow;
+  const want=rideLow||(inp.down&&P.onG&&!P.climb&&!P.ride&&!P.mount&&!P.warp&&!L.near&&!L.ladDown&&!L.chase);
+  if(want&&!P.crouch){const dh=P.ride?Math.round((P.h-20)*.5):Math.round(P.h*.5);P.crouch=dh;P.h-=dh;P.y+=dh;}
   else if(!want&&P.crouch){const dh=P.crouch;P.crouch=0;P.h+=dh;P.y-=dh;}}
 function stepPlay(){if(LV.flight){stepFlight();return;}
   if(P.warp){stepWarp();stepGoat();return;}
@@ -1670,8 +1674,8 @@ function stepPlay(){if(LV.flight){stepFlight();return;}
   if(L.doorLock>0)L.doorLock--;
   if(P.mount){stepWaffles();updCam();return;}
   if(L.tug){stepTug();updCam();return;}
-  const climbing=climbCheck();stepDuck();if(P.crouch){P.vx*=.6;P.holdT=0;}
-  const goL=!climbing&&!P.crouch&&inp.left&&!inp.right,goR=!climbing&&!P.crouch&&inp.right&&!inp.left,riding=!!P.ride;
+  const climbing=climbCheck();stepDuck();if(P.crouch&&!P.ride){P.vx*=.6;P.holdT=0;}
+  const goL=!climbing&&(!P.crouch||P.ride)&&inp.left&&!inp.right,goR=!climbing&&(!P.crouch||P.ride)&&inp.right&&!inp.left,riding=!!P.ride;
   // running: quick start, and a turbo scurry after holding a direction
   if((goL||goR)&&P.onG)P.holdT++;else if(!(goL||goR))P.holdT=0;
   const turbo=P.holdT>60;if(turbo&&!P.turboOn){P.turboOn=true;popText('TURBO!',P.x+P.w/2,P.y-20,'#7fe3ff');sfx('whoosh');}if(!turbo)P.turboOn=false;
@@ -1684,7 +1688,7 @@ function stepPlay(){if(LV.flight){stepFlight();return;}
   const wasAir=!P.onG;
   // hold jump to keep bouncing
   if(P.noJump&&!inp.jump)P.noJump=false;
-  if(!P.noJump&&(P.buf>0||(inp.jump&&P.onG&&P.landT>2))&&P.coy>0){P.vy=LV.jumpV?-LV.jumpV:(EASY()?-16.8:-16.4);P.buf=0;P.coy=0;P.jumping=true;P.sq=-1;sfx('jump');parts.push({kind:'dust',x:P.x+P.w/2,y:P.y+P.h,vx:0,vy:-.3,life:14});}
+  if(!P.noJump&&(P.buf>0||(inp.jump&&P.onG&&P.landT>2))&&P.coy>0){P.vy=(LV.jumpV?-LV.jumpV:(EASY()?-16.8:-16.4))*jumpK();P.buf=0;P.coy=0;P.jumping=true;P.sq=-1;sfx('jump');parts.push({kind:'dust',x:P.x+P.w/2,y:P.y+P.h,vx:0,vy:-.3,life:14});}
   else if(riding&&pressed('jump')&&!P.onG&&P.ride.flaps<4){P.ride.flaps++;P.vy=-9.5;sfx('flap');for(let i=0;i<3;i++)parts.push({kind:'feather',x:P.x+P.w/2,y:P.y+P.h-6,vx:(Math.random()-.5)*3,vy:Math.random()*2,life:40,r:Math.random()*6});}
   {const cut=LV.jumpV?-5:(LV.grav||1)<1?-11:-7;if(P.jumping&&!inp.jump&&P.vy<cut)P.vy=cut;}if(P.vy>=0)P.jumping=false;
   const gUp=EASY()?1:.98,gDown=EASY()?1.15:HARD()?1.5:1.35;
@@ -1760,7 +1764,7 @@ function stepPlay(){if(LV.flight){stepFlight();return;}
     if(overlap(P,e)){
       if(e.t==='snap'){if(e.ph>=100&&e.alive)hurt(e.x+e.w/2);if(state!=='play')return;continue;}
       if(e.saddle){if(!riding&&P.vy>0&&P.y+P.h-P.vy<=e.y+14){startGooseRide(e);continue;}continue;}
-      if(e.t==='fan'){if(P.vy>0&&P.y+P.h-P.vy<=e.y+16){P.vy=inp.jump?-16.5:-14.5;P.jumping=false;P.onG=false;e.cheer=30;sfx('boing');burst(e.x+e.w/2,e.y,'#ff9ccc',8,'star');}continue;}
+      if(e.t==='fan'){if(P.vy>0&&P.y+P.h-P.vy<=e.y+16){P.vy=inp.jump?-19.5:-18;P.jumping=false;P.onG=false;e.cheer=30;sfx('boing');burst(e.x+e.w/2,e.y,'#ff9ccc',8,'star');}continue;}
       if(riding){killEnemy(e);P.vy=Math.min(P.vy,-6);addEgg(1);continue;}
       if(P.vy>0&&P.y+P.h-P.vy<=e.y+12){killEnemy(e);P.vy=inp.jump?-12:-9;P.jumping=inp.jump;sfx('stomp');P.chain++;
         if(P.chain>=2){const words=['','','DOUBLE!','TRIPLE!','QUAD!'];popText((words[P.chain]||'MEGA!')+' +'+P.chain,P.x+P.w/2,P.y-26,'#7fe3ff',true);for(let k=0;k<P.chain;k++)addEgg(1);}else addEgg(1);continue;}
@@ -2420,7 +2424,7 @@ function drawPlayer(){const p=hero(),cx=P.x+P.w/2,fy=P.y+P.h,ft=p.H+13;
   if(P.swing){ctx.strokeStyle='#2a8a44';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx,fy-ft*.7);ctx.lineTo(cx,fy-ft-6);ctx.stroke();ctx.lineWidth=1;}
   if(P.mount==='cow'){drawSpr(heroSpr(p,'ride',P.hat),22,ft,cx,fy,P.face,1,1,L.wf.rot);return;}
   if(P.ride){const gfr=!P.onG?(frame%10<5?'flap':'stand'):(Math.abs(P.vx)>.5?(Math.floor(P.anim*1.5)%2?'walk1':'stand'):'stand');
-    drawSpr(gooseSpr(gfr,true),22,50,cx,fy,P.face,1.45,1.45);drawSpr(heroSpr(p,'ride',P.hat),22,ft,cx-P.face*3,fy-31,P.face,.95,.95);return;}
+    const lo=P.crouch>0;drawSpr(gooseSpr(gfr,true),22,50,cx,fy,P.face,1.45*(lo?1.08:1),1.45*(lo?.82:1));drawSpr(heroSpr(p,'ride',P.hat),22,ft,cx-P.face*3,fy-(lo?26:31),P.face,.95*(lo?1.12:1),.95*(lo?.5:1));return;}
   if(P.tumble>0){const rot=P.tumble*.34*P.face,ox=Math.round(Math.sin(P.tumble*.2)*14);drawSpr(heroSpr(p,P.tumble%16<8?'jump':'cheer',P.hat),22,ft/2,cx+ox,fy-ft/2,P.face,1.05,1.05,rot);return;}
   let sx=P.sq>0?1+P.sq*.18:1+P.sq*.12,sy=P.sq>0?1-P.sq*.16:1-P.sq*.14;if(P.crouch){sx=1.15;sy=.52;}
   ctx.save();if(P.sink>0){const sy0=P.warp&&P.warp.bw?P.warp.bw.y:fy;ctx.beginPath();ctx.rect(cx-80,sy0-260,160,260);ctx.clip();}
