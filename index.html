@@ -90,7 +90,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Holy Cow!</div>
 <script>
 'use strict';
-const VERSION='0.87';
+const VERSION='0.89';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search)||!/github\.io$/.test(location.hostname);
 /* =========================================================
@@ -578,6 +578,19 @@ JUNK.joystick=makeSprite(24,24,(R,P,E)=>{R(4,15,16,7,'#2d2d34');R(4,15,16,2,'#4a
 TILE.crumb=makeSprite(32,32,(R,P)=>{R(0,0,32,32,'#9a4a3a');R(0,0,32,3,'#ff9a7a');R(0,29,32,3,'#5a2a22');for(const [x,y,w] of [[4,8,9],[14,16,10],[6,22,8],[20,6,7]])R(x,y,w,2,'#5a2a22');P(26,20,'#ffb08a');P(10,13,'#ffb08a');},true);
 TILE.spacebar=makeSprite(32,32,(R)=>{R(0,0,32,9,'#232850');R(0,0,32,2,'#9ff3ff');R(0,7,32,2,'#c77dff');R(3,3,26,2,'#3a4380');for(const x of [6,16,26])R(x,4,2,1,'#e2b8ff');},true);
 TILE.moon2=makeSprite(32,32,(R,P,E)=>{R(0,0,32,32,'#7d7a8c');E(20,12,4,3,'#6a6780');E(7,24,3,2,'#6a6780');P(12,6,'#8d8a9a');P(27,27,'#8d8a9a');},true);
+// Moon mite: little one-eyed hopper with a glowing antenna
+const MITE={a:makeSprite(28,24,(R,P,E)=>{E(14,15,10,7,'#8a86b8');E(14,13,9,6,'#b9b6d9');E(14,12,4,4,'#fff');E(15,12,2,2,'#1b1220');P(13,11,'#fff');R(13,2,2,6,'#8a86b8');E(14,2,3,2,'#5ff3ff');R(5,20,3,3,'#6a6694');R(11,21,2,2,'#6a6694');R(16,21,2,2,'#6a6694');R(21,20,3,3,'#6a6694');R(9,17,10,1,'#6a6694');}),
+  b:makeSprite(28,24,(R,P,E)=>{E(14,14,10,7,'#8a86b8');E(14,12,9,6,'#b9b6d9');E(14,11,4,4,'#fff');E(15,11,2,2,'#1b1220');P(13,10,'#fff');R(12,1,2,6,'#8a86b8');E(12,1,3,2,'#5ff3ff');R(2,18,4,2,'#6a6694');R(22,18,4,2,'#6a6694');R(8,20,2,3,'#6a6694');R(18,20,2,3,'#6a6694');})};
+// Space jelly: glowing dome that floats and wobbles
+const JELLY={a:makeSprite(30,32,(R,P,E)=>{E(15,11,12,10,'#ff5fc8');E(15,9,10,7,'#ff9be0');E(11,7,3,2,'#fff8');E(11,12,2,2,'#2a0f3a');E(19,12,2,2,'#2a0f3a');R(13,15,4,1,'#2a0f3a');R(5,19,20,2,'#d94fb0');for(const [x,o] of [[6,0],[11,1],[16,0],[21,1]]){R(x,21+o,2,4,'#ff9be0');R(x+1,25+o,2,4,'#ff5fc8');}}),
+  b:makeSprite(30,32,(R,P,E)=>{E(15,11,13,9,'#ff5fc8');E(15,9,11,6,'#ff9be0');E(11,7,3,2,'#fff8');E(11,12,2,2,'#2a0f3a');E(19,12,2,2,'#2a0f3a');R(13,15,4,1,'#2a0f3a');R(4,19,22,2,'#d94fb0');for(const [x,o] of [[5,1],[11,0],[17,1],[22,0]]){R(x+1,21+o,2,4,'#ff9be0');R(x,25+o,2,4,'#ff5fc8');}})};
+// Goo blob: purple slime that oozes along
+const BLOB={a:makeSprite(30,22,(R,P,E)=>{E(15,15,13,7,'#7a3fd1');E(15,12,11,6,'#9b5cff');E(12,9,4,2,'#c79bff');E(11,13,3,3,'#fff');E(19,13,3,3,'#fff');P(12,13,'#1b1220');P(20,13,'#1b1220');R(6,20,3,2,'#7a3fd1');R(22,20,3,2,'#7a3fd1');}),
+  b:makeSprite(30,22,(R,P,E)=>{E(15,16,14,6,'#7a3fd1');E(15,14,12,5,'#9b5cff');E(12,11,4,2,'#c79bff');E(11,14,3,3,'#fff');E(19,14,3,3,'#fff');P(12,14,'#1b1220');P(20,14,'#1b1220');R(4,20,4,2,'#7a3fd1');R(23,20,4,2,'#7a3fd1');})};
+// Runaway robot sweeper
+const BOT={a:makeSprite(30,26,(R,P,E)=>{R(5,5,20,14,'#9aa6b8');R(5,5,20,3,'#c4cedc');R(8,9,14,5,'#1b2030');R(10,10,3,3,'#5ff3ff');R(17,10,3,3,'#5ff3ff');R(13,1,4,4,'#ff3d6e');R(5,19,20,2,'#5f6a7c');E(9,22,3,3,'#2a2a34');E(21,22,3,3,'#2a2a34');R(24,14,5,6,'#ffd23f');R(27,13,2,8,'#e0a92a');}),
+  b:makeSprite(30,26,(R,P,E)=>{R(5,5,20,14,'#9aa6b8');R(5,5,20,3,'#c4cedc');R(8,9,14,5,'#1b2030');R(11,10,3,3,'#5ff3ff');R(18,10,3,3,'#5ff3ff');R(13,1,4,4,'#ffd23f');R(5,19,20,2,'#5f6a7c');E(9,22,3,3,'#2a2a34');E(21,22,3,3,'#2a2a34');R(24,15,5,5,'#ffd23f');R(27,14,2,7,'#e0a92a');})};
+TILE.moonpad=makeSprite(32,32,(R,P,E)=>{R(0,0,32,32,'#5a5870');R(0,0,32,14,'#3fe8ff');R(0,12,32,3,'#1fa8c8');R(2,2,28,2,'#e6fdff');for(const x of [7,16,25]){R(x-3,9,6,2,'#ffffff');R(x-2,7,4,2,'#ffffff');R(x-1,5,2,2,'#ffffff');}R(0,15,32,2,'#2a2840');E(9,24,4,3,'#46445c');E(23,27,4,3,'#46445c');},true);
 const ALIEN={a:makeSprite(28,26,(R,P,E)=>{E(14,17,11,9,'#5fe07a');E(14,14,9,7,'#7dff8a');E(14,13,5,5,'#fff');E(15,13,3,3,'#1b1220');P(14,12,'#fff');R(13,1,2,6,'#5fe07a');E(14,1,3,2,'#ff6fb5');R(6,24,4,2,'#3fb055');R(18,24,4,2,'#3fb055');R(10,20,8,1,'#2f8a4e');}),
   b:makeSprite(28,26,(R,P,E)=>{E(14,18,12,8,'#5fe07a');E(14,15,10,6,'#7dff8a');E(14,14,5,5,'#fff');E(15,14,3,3,'#1b1220');P(14,13,'#fff');R(12,2,2,7,'#5fe07a');E(12,2,3,2,'#ff6fb5');R(4,24,6,2,'#3fb055');R(18,24,6,2,'#3fb055');})};
 JUNK.earbuds=makeSprite(24,22,(R,P,E)=>{E(7,9,5,5,'#f4f4f6');E(17,9,5,5,'#f4f4f6');R(6,13,3,8,'#e2e2ea');R(16,13,3,8,'#e2e2ea');E(7,9,2,2,'#2d2d34');E(17,9,2,2,'#2d2d34');});
@@ -653,6 +666,23 @@ function paintZorbix(cx,gy){const [bw,bh]=bgSize(),g2=gy/2;let gr=bg.createLinea
   ridge(.06,g2-24,12,.018,'#7a2f8a');
   for(let i=0;i<8;i++){const x=wrap(i*71-cx*.1,bw+40)-20,h=18+(i*13)%16,y=g2-6;bg.fillStyle='#5a1f6e';bg.beginPath();bg.ellipse(x,y,12,h*.6,0,Math.PI,0);bg.fill();bg.fillStyle='rgba(255,220,120,.8)';bg.fillRect(x-2,y-h*.3,3,3);}
   ridge(.14,g2-6,8,.03,'#4a1f6a');}
+// Moon crater cave: grey rock, glowing blue crystals
+function paintCrater(cx){const [bw,bh]=bgSize();let gr=bg.createLinearGradient(0,0,0,bh);gr.addColorStop(0,'#14142a');gr.addColorStop(1,'#2c2a44');bg.fillStyle=gr;bg.fillRect(0,0,bw,bh);
+  for(let i=0;i<34;i++){const x=wrap(i*71-cx*.18,bw+40)-20,y=(i*47)%bh;bg.fillStyle='#34324e';bg.beginPath();bg.ellipse(x,y,12+(i%3)*5,7+(i%2)*3,0,0,7);bg.fill();bg.fillStyle='#24223a';bg.beginPath();bg.ellipse(x+2,y+2,7,4,0,0,7);bg.fill();}
+  for(let i=0;i<10;i++){const x=wrap(i*93+30-cx*.3,bw+60)-30,base=bh-6-(i%3)*10,h=16+(i*7)%18,tw=.6+.4*Math.sin(frame*.05+i);bg.globalAlpha=tw;bg.fillStyle=i%2?'#5ff3ff':'#9ab8ff';bg.beginPath();bg.moveTo(x-5,base);bg.lineTo(x,base-h);bg.lineTo(x+5,base);bg.fill();bg.globalAlpha=tw*.25;bcirc(x,base-h/2,h*.8,'#5ff3ff');bg.globalAlpha=1;}
+  for(let i=0;i<9;i++){const x=wrap(i*111-cx*.18,bw+40)-20;bg.fillStyle='#2a283f';bg.beginPath();bg.moveTo(x-8,0);bg.lineTo(x,14+(i%4)*8);bg.lineTo(x+8,0);bg.fill();}}
+// inside a hollow asteroid: rocky rings and glowing ore veins
+function paintHollow(cx){const [bw,bh]=bgSize();bg.fillStyle='#2a1c18';bg.fillRect(0,0,bw,bh);
+  for(let r=6;r>=1;r--){bg.fillStyle=r%2?'#3a2820':'#46322a';bg.beginPath();bg.ellipse(bw/2-cx*.04%40,bh*.55,r*bw*.12,r*bh*.14,0,0,7);bg.fill();}
+  for(let i=0;i<14;i++){const x=wrap(i*83-cx*.22,bw+80)-40,y=(i*37)%bh,tw=.5+.5*Math.sin(frame*.04+i*1.7);bg.strokeStyle=`rgba(255,${150+(i%3)*40},60,${.35+.45*tw})`;bg.lineWidth=2;bg.beginPath();bg.moveTo(x,y);bg.lineTo(x+12,y+6);bg.lineTo(x+20,y+2);bg.lineTo(x+30,y+10);bg.stroke();}
+  for(let i=0;i<12;i++){const x=wrap(i*67+frame*.15-cx*.3,bw+40)-20,y=40+(i*29)%(bh-80)+Math.sin(frame*.03+i)*6;bg.fillStyle='#5a4236';bg.fillRect(x,y,5+(i%3)*2,4+(i%2)*2);bg.fillStyle='#6e5444';bg.fillRect(x,y,5+(i%3)*2,1);}}
+// alien arcade: dark room, rows of glowing cabinets
+function paintArcade(cx){const [bw,bh]=bgSize();bg.fillStyle='#0a0618';bg.fillRect(0,0,bw,bh);
+  for(let y=0;y<bh;y+=8){bg.fillStyle=`rgba(120,60,200,${.05+.04*((y/8)%2)})`;bg.fillRect(0,y,bw,4);}
+  const base=bh-10;for(let i=0;i<12;i++){const x=wrap(i*58-cx*.25,bw+80)-40,hue=(i*55+frame*.5)%360;bg.fillStyle='#1c1430';bg.fillRect(x,base-64,36,64);bg.fillStyle='#2c2048';bg.fillRect(x,base-64,36,6);
+    bg.fillStyle=`hsl(${hue},90%,${45+15*Math.sin(frame*.08+i)}%)`;bg.fillRect(x+5,base-54,26,20);bg.fillStyle='#0a0618';bg.fillRect(x+9,base-48,4,4);bg.fillRect(x+21,base-44,4,4);
+    bg.fillStyle='#ff3d6e';bg.fillRect(x+10,base-28,4,4);bg.fillStyle='#5ff3ff';bg.fillRect(x+20,base-28,4,4);bg.fillStyle=`hsla(${hue},100%,60%,.18)`;bg.fillRect(x-6,base-60,48,40);}
+  for(let k=0;k<4;k++){const h2=(k*90+frame)%360;bg.fillStyle=`hsla(${h2},100%,65%,${.4+.25*Math.sin(frame*.07+k)})`;bg.fillRect(0,14+k*12,bw,1.5);}}
 function paintNeon(cx,hue){const [bw,bh]=bgSize();let gr=bg.createLinearGradient(0,0,0,bh);gr.addColorStop(0,'#08021a');gr.addColorStop(1,'#1a0636');bg.fillStyle=gr;bg.fillRect(0,0,bw,bh);
   const glow=(x,y,r,c)=>{const g=bg.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,c);g.addColorStop(1,'rgba(0,0,0,0)');bg.fillStyle=g;bg.fillRect(x-r,y-r,r*2,r*2);};
   glow(bw*.25,bh*.35,160,`hsla(${hue},100%,60%,.28)`);glow(bw*.75,bh*.5,170,`hsla(${(hue+120)%360},100%,60%,.22)`);
@@ -1010,7 +1040,7 @@ function buildW6(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   return b;}
 /* Level 7: The Moon (leveled up). Anti-gravity bubbles, a crater field, a meteor shower, hopping aliens. Henry's UFO waits at the end. */
 function buildW7(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,ground}=kit(397,'N');b.drafts=[];
-  const rock=(x1,x2,top,bot)=>fill(x1,x2,top,bot==null?top:bot,'N'),alien=x=>b.ents.push(E('alien',x*T,12*T,26,24)),
+  const rock=(x1,x2,top,bot)=>fill(x1,x2,top,bot==null?top:bot,'N'),alien=x=>b.ents.push(E('mite',x*T,12*T,24,20)),crater=(x1,x2)=>fill(x1,x2,14,14,' '),pad=x=>{g[14][x]='J';},
     vent=(x,top)=>b.drafts.push({x:x*T-8,w:T+16,top:top*T,bot:GY,vent:true}),
     bubble=(x,top,bot)=>b.drafts.push({x:x*T-20,w:T+40,top:top*T,bot:(bot||14)*T,bubble:true}),beacon=x=>b.checks.push({x:x*T,on:false});
   b.parts={tank:1,pipes:1,vane:1,bowl:1,fireworks:1};
@@ -1025,19 +1055,19 @@ function buildW7(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   // a vent up to the moon cave
   vent(100,2);for(let y=3;y<=11;y++)egg(100,y);rock(103,110,3);eggs(103,2,4);b.decor.push({kind:'cavemouth',x:107*T,y:3*T});b.hints.push({x:108*T,y:1*T,kind:'sparkle'});
   b.doors.push({x:107*T,y:1*T,w:64,h:64,to:{zone:1,x:325*T,y:GY},secret:'mooncave',title:'SECRET MOON CAVE!',sub:'Glowing moon crystals everywhere'});
-  alien(115);eggs(116,13,4);alien(124);beacon(127);
+  crater(113,121);alien(115);eggs(114,14,3);alien(119);eggs(118,14,3);beacon(127);
   // meteor shower: hide under rocks and boxes
-  sign(131,'Meteor shower! Watch for red targets!');eggs(136,13,5);rock(146,150,10);eggs(146,13,4);eggs(153,13,4);
+  sign(131,'Meteor shower! Watch for red targets!');eggs(136,13,3);pad(140);sign(143,'Bounce pad!');for(let y=4;y<=11;y++)egg(140,y);rock(143,145,4);eggs(143,3,3);rock(146,150,10);eggs(146,13,4);eggs(153,13,4);
   b.doors.push({x:160*T,y:12*T,w:64,h:64,to:{zone:2,x:363*T,y:GY},secret:'moonbase',calm:true,launch:true,title:'SECRET MOON BASE!',sub:'WHOOSH! You got launched to a hidden base!'});
-  eggs(163,13,4);rock(168,172,10);eggs(168,13,4);g[10][181]='X';g[10][182]='R';g[10][183]='X';eggs(181,13,3);eggs(187,13,4);rock(192,195,10);eggs(192,13,3);beacon(199);
+  eggs(163,13,4);rock(168,172,10);eggs(168,13,4);g[10][181]='X';g[10][182]='R';g[10][183]='X';eggs(181,13,3);pad(186);arc(186,6,7,2);rock(192,195,10);eggs(192,9,4);eggs(192,13,3);beacon(199);
   // a crater with a bubble ride over it, and aliens on patrol
-  bubble(203,4);for(let y=5;y<=11;y++)egg(203,y);arc(205,6,8,2);alien(220);eggs(222,13,4);alien(228);
+  bubble(203,4);for(let y=5;y<=11;y++)egg(203,y);arc(205,6,8,2);crater(218,226);alien(220);eggs(219,14,3);alien(224);eggs(223,14,3);pad(230);arc(230,5,6,2);
   bubble(233,3);rock(237,242,4);eggs(237,3,4);gold(241,1,2);alien(238);eggs(244,13,4);alien(248);beacon(252);
   // last run to Henry's UFO
   sign(262,'Henry’s UFO ➜');arc(264,11,8,3);eggs(273,13,5);
   // secret room 1 (busy): moon cave
-  fill(322,357,0,1,'N');fill(322,322,0,13,'N');fill(357,357,0,13,'N');fill(322,357,14,16,'N');plank(326,329,11);plank(331,334,9);plank(336,340,7);plank(342,345,9);plank(347,350,11);plank(337,339,4);
-  eggs(326,10,4);eggs(331,8,4);eggs(336,6,5);eggs(342,8,4);eggs(347,10,4);gold(338,2,1);eggs(325,13,4);eggs(343,13,5);
+  fill(322,357,0,1,'N');fill(322,322,0,13,'N');fill(357,357,0,13,'N');fill(322,357,14,16,'N');rock(326,328,10);rock(331,333,7);rock(345,347,7);rock(350,352,10);
+  bubble(339,3,14);for(let y=4;y<=12;y++)egg(339,y);gold(338.5,2,1);eggs(326,9,3);eggs(331,6,3);eggs(345,6,3);eggs(350,9,3);eggs(325,13,4);eggs(343,13,5);b.ents.push(E('mite',334*T,12*T,24,20));
   b.doors.push({x:353*T,y:12*T,w:64,h:64,to:{zone:0,x:110*T,y:3*T}});
   // secret room 2 (calm): moon base
   fill(360,395,0,1,'Z');fill(360,360,0,13,'Z');fill(395,395,0,13,'Z');fill(360,395,14,16,'Z');
@@ -1046,132 +1076,136 @@ function buildW7(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
   return b;}
 const FLIGHT_END=21000;
 /* Level 8: Asteroid Belt (on foot). Hop floating asteroids with the jetpack: still ones, drifting ones, crumbling ones. */
-function buildW8(){const {g,b,fill,egg,eggs,arc,gold,sign,plank,block,ground}=kit(497,'N');b.drafts=[];b.logs=[];
-  const rock=(x1,x2,top,bot)=>fill(x1,x2,top,bot==null?top:bot,'N'),crumb=(x1,x2,row)=>fill(x1,x2,row,row,'A'),alien=(x,row)=>b.ents.push(E('alien',x*T,(row||12)*T,26,24)),
+function buildW8(){const {g,b,fill,egg,eggs,arc,gold,sign,plank,block,ground}=kit(417,'N');b.drafts=[];b.logs=[];
+  const rock=(x1,x2,top,bot)=>fill(x1,x2,top,bot==null?top:bot,'N'),crumb=(x1,x2,row)=>fill(x1,x2,row,row,'A'),jelly=(x,row)=>b.ents.push(E('jelly',x*T,(row||9)*T,28,28)),
     drift=(x0,x1,row,w,sp,dy)=>b.logs.push({x:x0*T,x0:x0*T,x1:(x1+1)*T,y:row*T,y0:row*T-(dy||0)*T,y1:row*T+(dy||0)*T,vy:dy?.45:0,w:(w||3)*T,h:16,vx:sp||1,rock:true}),
     vent=(x,top,bot)=>b.drafts.push({x:x*T-8,w:T+16,top:top*T,bot:(bot||14)*T,vent:true}),bubble=(x,top,bot)=>b.drafts.push({x:x*T-20,w:T+40,top:top*T,bot:(bot||14)*T,bubble:true}),
     beacon=(x,row)=>b.checks.push({x:x*T,y:(row||14)*T,on:false});
   b.parts={tank:1,pipes:1,vane:1,bowl:1,fireworks:1};
   // landing asteroid
   ground(0,24);sign(8,'Asteroid Belt');eggs(9,13,4);g[10][14]='X';g[10][15]='M';g[10][16]='X';eggs(14,7,3);sign(20,'Hop the floating rocks!');
-  // 1: still rocks
-  rock(28,31,13,15);eggs(28,12,4);rock(35,38,11,12);eggs(35,10,4);rock(42,46,12,14);eggs(42,11,5);alien(44,11);rock(50,53,10,11);eggs(50,9,4);gold(52,6,0);
+  // 1: still rocks, a space jelly floating over the middle one
+  rock(28,31,13,15);eggs(28,12,4);rock(35,38,11,12);eggs(35,10,4);rock(42,46,12,14);eggs(42,11,5);jelly(44,7);rock(50,53,10,11);eggs(50,9,4);gold(52,6,0);
   rock(57,63,12,15);eggs(57,11,7);beacon(60,12);
   // 2: drifting rocks
-  sign(61,'Some rocks drift!',12);drift(66,80,12,4,1.1);arc(67,9,10,2);rock(82,86,12,14);eggs(82,11,5);drift(89,102,11,4,-1.3);drift(104,116,13,4,1.2,1.5);eggs(105,10,3);rock(119,124,12,15);alien(122,11);eggs(119,11,4);
-  // vent up to the high field + cave door
+  sign(61,'Some rocks drift!',12);drift(66,80,12,4,1.1);arc(67,9,10,2);rock(82,86,12,14);eggs(82,11,5);drift(89,102,11,4,-1.3);drift(104,116,13,4,1.2,1.5);eggs(105,10,3);rock(119,124,12,15);jelly(121,7);eggs(119,11,4);
+  // vent up to the high field + the hollow asteroid door
   vent(126,3,12);for(let y=4;y<=10;y++)egg(126,y);rock(129,140,4);eggs(129,3,8);gold(138,2,1);b.decor.push({kind:'cavemouth',x:133*T,y:4*T});b.hints.push({x:134*T,y:2*T,kind:'sparkle'});
-  b.doors.push({x:133*T,y:2*T,w:64,h:64,to:{zone:1,x:425*T,y:GY},secret:'astcave',title:'SECRET CRYSTAL CAVE!',sub:'Hidden inside an asteroid!'});
+  b.doors.push({x:133*T,y:2*T,w:64,h:64,to:{zone:1,x:345*T,y:GY},secret:'astcave',title:'SECRET HOLLOW ASTEROID!',sub:'It’s hollow inside!'});
   rock(127,132,12,15);beacon(130,12);eggs(132,11,1);
-  // 3: crumbling rocks (they fall apart after you land!)
-  sign(144,'Red rocks crumble! Keep moving!',12);rock(143,146,12,15);crumb(150,153,12);eggs(150,11,3);crumb(156,159,11);eggs(156,10,3);crumb(162,165,12);eggs(162,11,3);crumb(168,171,10);eggs(168,9,3);
-  rock(174,180,12,15);eggs(174,11,6);alien(178,11);beacon(176,12);
+  // 3: every hop is different: crumble, a bobbing rock, a high crumble, then a jelly on guard
+  sign(144,'Red rocks crumble! Keep moving!',12);rock(143,146,12,15);crumb(150,153,12);eggs(150,11,3);drift(156,159,11,3,.35,2);eggs(157,7,2);crumb(163,165,9);eggs(163,8,3);
+  rock(168,171,12,13);eggs(168,11,4);jelly(169,7);rock(174,180,12,15);eggs(174,11,6);beacon(176,12);
   // 4: bubble ride over a big gap + mixed
-  bubble(183,3,12);for(let y=4;y<=10;y++)egg(183,y);arc(185,5,10,1);rock(197,202,8,9);eggs(197,7,5);drift(206,220,10,4,1.3);crumb(223,226,11);eggs(223,10,3);rock(229,236,12,15);eggs(229,11,7);alien(233,11);
+  bubble(183,3,12);for(let y=4;y<=10;y++)egg(183,y);arc(185,5,10,1);rock(197,202,8,9);eggs(197,7,5);drift(206,220,10,4,1.3);crumb(223,226,11);eggs(223,10,3);rock(229,236,12,15);eggs(229,11,7);jelly(233,8);
   // the launch pad surprise
-  rock(240,252,13,15);eggs(240,12,4);b.doors.push({x:246*T,y:11*T,w:64,h:64,to:{zone:2,x:463*T,y:GY},secret:'astbase',calm:true,launch:true,title:'SECRET SPACE STATION!',sub:'WHOOSH! You got launched to a hidden station!'});beacon(249,13);
-  // 5: meteor shower over a long rocky asteroid (hide under rock arches)
-  ground(256,330);sign(258,'Meteor shower!');rock(268,273,10);eggs(268,13,5);rock(286,291,10);eggs(286,13,5);block(300,302,12,'X');eggs(300,11,3);rock(312,317,10);eggs(312,13,5);alien(280);alien(306);beacon(322);
+  rock(240,252,13,15);eggs(240,12,4);b.doors.push({x:246*T,y:11*T,w:64,h:64,to:{zone:2,x:383*T,y:GY},secret:'astbase',calm:true,launch:true,title:'SECRET SPACE STATION!',sub:'WHOOSH! You got launched to a hidden station!'});beacon(249,13);
+  // 5: meteor shower (hide under the rock arches)
+  ground(256,288);sign(258,'Meteor shower!');rock(264,269,10);eggs(264,13,5);block(276,278,12,'X');eggs(276,11,3);jelly(272,8);rock(282,286,10);eggs(282,13,4);beacon(285);
   // 6: last hops
-  rock(334,337,12,15);drift(340,354,11,4,1.4,1);crumb(357,360,11);eggs(357,10,3);rock(362,365,10,11);eggs(362,9,4);gold(364,6,2);drift(368,382,12,4,-1.2);
-  ground(385,419);sign(390,'Henry’s UFO ➜');eggs(392,13,5);
-  // secret room 1 (busy): crystal cave
-  fill(422,457,0,1,'N');fill(422,422,0,13,'N');fill(457,457,0,13,'N');fill(422,457,14,16,'N');plank(426,429,11);plank(431,434,9);plank(436,440,7);plank(442,445,9);plank(447,450,11);plank(437,439,4);
-  eggs(426,10,4);eggs(431,8,4);eggs(436,6,5);eggs(442,8,4);eggs(447,10,4);eggs(443,13,5);eggs(425,13,4);
-  b.doors.push({x:453*T,y:12*T,w:64,h:64,to:{zone:0,x:138*T,y:4*T}});
+  crumb(292,294,12);eggs(292,11,3);rock(297,300,10,11);eggs(297,9,4);gold(299,6,2);
+  ground(304,339);sign(309,'Henry’s UFO ➜');eggs(311,13,5);
+  // secret room 1 (busy): inside a hollow asteroid, ride the drifting rock through the egg trail
+  fill(342,377,0,1,'N');fill(342,342,0,13,'N');fill(377,377,0,13,'N');fill(342,377,14,16,'N');rock(343,345,9);eggs(343,8,3);
+  drift(347,369,10,3,1.1);eggs(348,8,22);eggs(350,13,4);eggs(362,13,4);rock(371,376,5);vent(373,4,14);for(let y=6;y<=12;y++)egg(373,y);eggs(371,4,3);
+  b.doors.push({x:373*T,y:12*T,w:64,h:64,to:{zone:0,x:138*T,y:4*T}});
   // secret room 2 (calm): space station
-  fill(460,495,0,1,'Z');fill(460,460,0,13,'Z');fill(495,495,0,13,'Z');fill(460,495,14,16,'Z');block(470,472,12,'X');eggs(470,11,3);plank(464,467,10);eggs(464,9,4);plank(475,478,9);eggs(475,8,4);eggs(463,13,4);eggs(480,13,4);
-  b.chests.push({x:484*T,y:GY,open:false});b.items.push({t:'junk',kind:'remote',x:488*T,y:GY-26,w:26,h:24});
-  b.doors.push({x:491*T,y:12*T,w:64,h:64,to:{zone:0,x:251*T,y:13*T}});
+  fill(380,415,0,1,'Z');fill(380,380,0,13,'Z');fill(415,415,0,13,'Z');fill(380,415,14,16,'Z');block(390,392,12,'X');eggs(390,11,3);plank(384,387,10);eggs(384,9,4);plank(395,398,9);eggs(395,8,4);eggs(383,13,4);eggs(400,13,4);
+  b.chests.push({x:404*T,y:GY,open:false});b.items.push({t:'junk',kind:'remote',x:408*T,y:GY-26,w:26,h:24});
+  b.doors.push({x:411*T,y:12*T,w:64,h:64,to:{zone:0,x:251*T,y:13*T}});
   return b;}
 /* Level 9: Planet Zorbix, the alien village. Huts, friendly villagers, alien crates for Buttons to headbutt, goo geysers, and Henry on a throne. */
-function buildW9(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,ground}=kit(477,'G');b.drafts=[];
-  const hut=(x,c)=>b.decor.push({kind:'hut',x:x*T,c:c||0}),vill=(x,v)=>b.decor.push({kind:'villager',x:x*T,v:v||0}),alien=x=>b.ents.push(E('alien',x*T,12*T,26,24)),
+function buildW9(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,ground}=kit(417,'G');b.drafts=[];
+  const hut=(x,c)=>b.decor.push({kind:'hut',x:x*T,c:c||0}),vill=(x,v)=>b.decor.push({kind:'villager',x:x*T,v:v||0}),
+    fan=(x,v,row)=>b.ents.push(E('fan',x*T,((row||14)*T)-30,26,28,{v:v||0})),blob=x=>b.ents.push(E('blob',x*T,12*T,28,20)),bot=x=>b.ents.push(E('bot',x*T,12*T,28,24)),
     crates=(x,top,w)=>fill(x,x+(w||1)-1,top,13,'B'),geyser=(x,top,ph)=>b.drafts.push({x:x*T-12,w:T+24,top:top*T,bot:GY,geyser:true,period:150,on:95,ph:ph||0}),
     pit=(x1,x2)=>fill(x1,x2,14,16,' '),ledge=(x1,x2,row)=>plank(x1,x2,row),beacon=x=>b.checks.push({x:x*T,on:false});
-  b.parts={tank:1,pipes:1,vane:1,bowl:1,fireworks:1};ground(0,399);
+  b.parts={tank:1,pipes:1,vane:1,bowl:1,fireworks:1};ground(0,339);
   // landing field + village gate
   sign(8,'Planet Zorbix');eggs(9,13,4);hut(15,0);vill(19,0);g[10][22]='X';g[10][23]='M';g[10][24]='X';eggs(22,6,3);arc(26,12,6,2);vill(32,1);hut(35,1);
   sign(42,'Pickles can pounce on alien crates!');crates(47,7,2);eggs(46,13,1);eggs(50,13,4);
-  // village square
-  hut(56,2);vill(60,0);vill(63,1);ledge(66,70,10);eggs(66,9,5);ledge(72,76,7);eggs(72,6,5);gold(76,4,0);alien(80);eggs(80,13,4);hut(86,0);vill(90,1);beacon(94);
+  // village square: friendly aliens give you a bounce
+  hut(56,2);sign(58,'Hop on a friendly alien for a BIG bounce!');fan(62,0);ledge(66,70,10);eggs(66,9,5);ledge(72,76,7);eggs(72,6,5);gold(76,4,0);blob(81);eggs(80,13,4);hut(86,0);vill(90,1);beacon(94);
   // goo geysers over goo pits
   sign(98,'Ride the goo geysers!');pit(103,107);geyser(105,4,0);for(let y=5;y<=11;y++)egg(105,y);ledge(109,113,8);eggs(109,7,5);pit(117,121);geyser(119,3,50);ledge(123,128,6);eggs(123,5,6);
-  alien(132);eggs(133,13,4);hut(138,2);vill(142,0);
-  // the arcade hut (crate blocks the door)
+  bot(132);eggs(133,13,4);hut(138,2);vill(142,0);
+  // the arcade hut (a crate blocks the door)
   b.decor.push({kind:'arcadehut',x:150*T});g[13][153]='B';g[12][153]='B';b.hints.push({x:153*T+16,y:11*T,kind:'sparkle'});
-  b.doors.push({x:152.5*T,y:12*T,w:64,h:64,to:{zone:1,x:405*T,y:GY},need:{x:153,y:13},secret:'arcade',title:'SECRET ALIEN ARCADE!',sub:'Everything glows in here!'});
+  b.doors.push({x:152.5*T,y:12*T,w:64,h:64,to:{zone:1,x:345*T,y:GY},need:{x:153,y:13},secret:'arcade',title:'SECRET ALIEN ARCADE!',sub:'Everything glows in here!'});
   eggs(158,13,4);beacon(164);
-  // market street: crates and ledges
-  crates(170,10,3);eggs(170,9,3);ledge(176,180,9);eggs(176,8,5);alien(184);vill(190,1);hut(193,1);g[10][200]='X';g[10][201]='R';g[10][202]='X';eggs(200,6,3);
-  pit(208,212);geyser(210,4,90);arc(208,9,5,2);alien(218);crates(224,7,2);eggs(223,13,1);eggs(227,13,4);beacon(232);
+  // market street: a crate staircase, a friendly bounce up to the blocks, robots on the loose
+  crates(170,12,1);crates(172,10,1);crates(174,8,1);eggs(170,11,1);eggs(172,9,1);eggs(174,7,1);ledge(177,181,7);eggs(177,6,5);
+  fan(190,1);g[9][189]='X';g[9][190]='R';g[9][191]='X';eggs(189,5,3);bot(198);hut(201,1);
+  pit(208,212);geyser(210,4,90);arc(208,9,5,2);blob(217);eggs(219,13,5);blob(225);beacon(232);
   // the surprise launch pad
-  eggs(236,13,4);b.doors.push({x:243*T,y:12*T,w:64,h:64,to:{zone:2,x:443*T,y:GY},secret:'henryroom',calm:true,launch:true,title:'HENRY’S ROOM?!',sub:'WHOOSH! The aliens built Henry a fancy room!'});
-  eggs(250,13,5);hut(256,0);vill(260,0);vill(263,1);
+  eggs(236,13,4);b.doors.push({x:243*T,y:12*T,w:64,h:64,to:{zone:2,x:383*T,y:GY},secret:'henryroom',calm:true,launch:true,title:'HENRY’S ROOM?!',sub:'WHOOSH! The aliens built Henry a fancy room!'});
+  eggs(250,13,4);hut(254,0);vill(258,0);fan(262,1);
   // the hill up to the palace
-  block(270,272,12,'G');block(273,275,10,'G');block(276,278,8,'G');eggs(270,11,3);eggs(273,9,3);eggs(276,7,3);ledge(281,285,6);eggs(281,5,6);
-  block(288,300,8,'G');eggs(288,7,6);b.ents.push(E('alien',294*T,6*T,26,24));pit(303,307);geyser(305,5,30);eggs(310,13,4);alien(316);beacon(322);
-  crates(328,7,2);eggs(327,13,1);hut(334,2);vill(338,0);vill(341,1);ledge(345,349,9);eggs(345,8,5);gold(349,5,2);
-  sign(356,'The Palace ➜');eggs(358,13,6);
-  b.decor.push({kind:'throne',x:385*T});
-  // secret room 1 (busy): alien arcade
-  fill(402,437,0,1,'Z');fill(402,402,0,13,'Z');fill(437,437,0,13,'Z');fill(402,437,14,16,'Z');plank(406,409,11);plank(411,414,9);plank(416,420,7);plank(422,425,9);plank(427,430,11);plank(417,419,4);gold(418,2,1);
-  eggs(406,10,4);eggs(411,8,4);eggs(416,6,5);eggs(422,8,4);eggs(427,10,4);eggs(423,13,5);eggs(405,13,4);
-  b.doors.push({x:433*T,y:12*T,w:64,h:64,to:{zone:0,x:158*T,y:GY}});
+  block(266,268,12,'G');block(269,271,10,'G');block(272,274,8,'G');eggs(266,11,3);eggs(269,9,3);eggs(272,7,3);ledge(277,281,6);eggs(277,5,5);gold(281,3,2);
+  pit(284,288);geyser(286,5,30);bot(291);beacon(294);sign(296,'The Palace ➜');eggs(297,13,4);
+  b.decor.push({kind:'throne',x:325*T});
+  // secret room 1 (busy): alien arcade, bounce off the players to reach the high scores
+  fill(342,377,0,1,'Z');fill(342,342,0,13,'Z');fill(377,377,0,13,'Z');fill(342,377,14,16,'Z');
+  ledge(345,350,8);eggs(345,7,6);ledge(355,362,5);eggs(355,4,8);gold(358,2,1);ledge(367,372,8);eggs(367,7,6);fan(352,0);fan(364,1);eggs(345,13,4);eggs(356,13,6);
+  b.doors.push({x:373*T,y:12*T,w:64,h:64,to:{zone:0,x:158*T,y:GY}});
   // secret room 2 (calm): Henry's room
-  fill(440,475,0,1,'G');fill(440,440,0,13,'G');fill(475,475,0,13,'G');fill(440,475,14,16,'G');eggs(445,13,4);plank(450,453,10);eggs(450,9,4);eggs(458,13,4);
-  b.chests.push({x:466*T,y:GY,open:false});b.items.push({t:'junk',kind:'joystick',x:470*T,y:GY-26,w:26,h:24});
-  b.doors.push({x:471*T,y:12*T,w:64,h:64,to:{zone:0,x:248*T,y:GY}});
+  fill(380,415,0,1,'G');fill(380,380,0,13,'G');fill(415,415,0,13,'G');fill(380,415,14,16,'G');eggs(385,13,4);plank(390,393,10);eggs(390,9,4);eggs(398,13,4);
+  b.chests.push({x:406*T,y:GY,open:false});b.items.push({t:'junk',kind:'joystick',x:410*T,y:GY-26,w:26,h:24});
+  b.doors.push({x:411*T,y:12*T,w:64,h:64,to:{zone:0,x:248*T,y:GY}});
   return b;}
 /* Level 10: Crash Site Jungle. On foot now. Mushroom bounces, swinging vines, snap plants, jungle bats, Henry tags along. */
-function buildW10(){const {g,b,fill,egg,eggs,arc,gold,sign,plank,block,ground}=kit(497,'E');b.vines=[];b.mush=[];
+function buildW10(){const {g,b,fill,egg,eggs,arc,gold,sign,plank,block,ground}=kit(417,'E');b.vines=[];b.mush=[];
   const mush=(x,row)=>{fill(x,x+2,row,row,'J');b.mush.push({x,row});},vine=(x,row,len)=>b.vines.push({ax:x*T+16,ay:row*T,len:len*T,ang:.3,av:0}),
     snap=x=>b.ents.push(E('snap',x*T,GY-44,30,44)),bat=(x,row)=>b.ents.push(E('crow',x*T,row*T,26,18,{bat:true})),pit=(x1,x2)=>fill(x1,x2,14,16,' '),beacon=x=>b.checks.push({x:x*T,on:false}),wall=(x1,x2,top)=>fill(x1,x2,top,13,'E');
-  ground(0,419);b.decor.push({kind:'wreck',x:4*T});
+  ground(0,339);b.decor.push({kind:'wreck',x:4*T});
   sign(14,'Crash Site Jungle');eggs(15,13,4);g[10][20]='X';g[10][21]='M';g[10][22]='X';eggs(20,6,3);
   sign(26,'Bounce on the mushrooms!');mush(30,13);arc(30,6,4,2);wall(36,38,6);eggs(36,5,3);eggs(41,13,3);
   sign(45,'Spike pods puff up! Pass when they shrink.');snap(50);eggs(48,13,1);eggs(53,13,2);snap(57);eggs(60,13,2);beacon(63);
+  // vines 1: learn to swing over a pit
   sign(66,'Grab the vines! Jump to let go.');pit(70,90);vine(72,2,9);vine(80,2,9);vine(87,2,9);eggs(70,11,5);eggs(78,11,5);eggs(85,11,5);eggs(94,13,4);beacon(98);
-  b.decor.push({kind:'waterfall',x:104*T});b.doors.push({x:105*T,y:12*T,w:64,h:64,to:{zone:1,x:425*T,y:GY},secret:'falls',title:'SECRET WATERFALL CAVE!',sub:'Hidden behind the falls!'});
-  eggs(112,13,3);mush(116,13);mush(122,11);mush(128,9);eggs(116,10,3);eggs(122,8,3);eggs(128,6,3);gold(129,1,0);bat(134,5);snap(139);eggs(142,13,4);bat(147,6);
-  b.decor.push({kind:'tree',x:158*T});plank(155,164,7);mush(151,13);eggs(155,6,3);b.doors.push({x:159*T,y:5*T,w:64,h:64,to:{zone:2,x:463*T,y:GY},secret:'treehut',calm:true,title:'SECRET TREETOP HUT!',sub:'Cozy up here…'});
-  eggs(166,13,4);snap(172);beacon(176);snap(181);eggs(184,13,3);
-  pit(192,214);vine(194,2,9);vine(202,2,9);vine(209,2,9);eggs(192,11,5);eggs(200,11,5);eggs(207,11,5);eggs(218,13,4);bat(224,5);
-  g[10][230]='X';g[10][231]='R';g[10][232]='X';eggs(230,6,3);snap(238);beacon(243);mush(248,13);plank(252,258,6);eggs(252,5,6);gold(258,3,1);bat(262,5);snap(268);eggs(270,13,4);
-  wall(278,282,9);mush(274,13);eggs(278,8,5);eggs(285,13,4);bat(290,6);snap(296);eggs(300,13,3);beacon(304);
-  sign(306,'Big swing!');pit(310,344);vine(312,2,9);vine(321,2,9);vine(330,2,9);vine(338,2,9);eggs(310,11,5);eggs(319,11,5);eggs(328,11,5);eggs(336,11,5);eggs(348,13,4);beacon(352);
-  snap(358);bat(363,5);mush(368,13);eggs(368,10,3);snap(374);eggs(378,13,6);
-  b.decor.push({kind:'zib',x:400*T});sign(405,'Mushroom Village ➜');
-  // secret room 1 (busy): waterfall cave
-  fill(422,457,0,1,'E');fill(422,422,0,13,'E');fill(457,457,0,13,'E');fill(422,457,14,16,'E');plank(426,429,11);plank(431,434,9);plank(436,440,7);plank(442,445,9);plank(447,450,11);plank(437,439,4);gold(438,2,2);
-  eggs(426,10,4);eggs(431,8,4);eggs(436,6,5);eggs(442,8,4);eggs(447,10,4);eggs(425,13,4);eggs(443,13,5);b.doors.push({x:453*T,y:12*T,w:64,h:64,to:{zone:0,x:112*T,y:GY}});
+  b.decor.push({kind:'waterfall',x:104*T});b.doors.push({x:105*T,y:12*T,w:64,h:64,to:{zone:1,x:345*T,y:GY},secret:'falls',title:'SECRET WATERFALL CAVE!',sub:'Hidden behind the falls!'});
+  // mushroom staircase up to the gold
+  eggs(110,13,2);mush(116,13);mush(122,11);mush(128,9);eggs(116,10,3);eggs(122,8,3);eggs(128,6,3);gold(129,1,0);bat(137,5);snap(141);eggs(144,13,3);
+  b.decor.push({kind:'tree',x:158*T});plank(155,164,7);mush(151,13);eggs(155,6,3);b.doors.push({x:159*T,y:5*T,w:64,h:64,to:{zone:2,x:383*T,y:GY},secret:'treehut',calm:true,title:'SECRET TREETOP HUT!',sub:'Cozy up here…'});
+  eggs(166,13,4);snap(172);beacon(176);eggs(180,13,3);
+  // vines 2: no pit this time, but spike pods are waiting underneath. Gems ride the swing.
+  sign(186,'Swing over the spike pods!');vine(192,2,9);vine(201,2,9);vine(210,2,9);snap(195);snap(204);snap(213);arc(189,8,8,2);arc(198,8,8,2);arc(207,8,8,2);eggs(217,13,3);beacon(220);
+  // mushroom up to the high branch
+  g[10][226]='X';g[10][227]='R';g[10][228]='X';eggs(226,6,3);bat(233,5);mush(240,13);plank(244,250,6);eggs(244,5,6);gold(250,3,1);snap(256);eggs(259,13,3);
+  wall(266,270,9);mush(262,13);eggs(266,8,5);eggs(273,13,3);beacon(279);
+  // vines 3: the big one. Time your jump past the bat between the vines.
+  sign(282,'Big swing! Watch the bat!');pit(286,302);vine(288,2,9);vine(298,2,9);bat(293,4);eggs(286,11,4);eggs(296,11,4);eggs(304,13,4);
+  b.decor.push({kind:'zib',x:320*T});sign(325,'Crystal Caves ➜');
+  // secret room 1 (busy): waterfall cave with vines inside
+  fill(342,377,0,1,'E');fill(342,342,0,13,'E');fill(377,377,0,13,'E');fill(342,377,14,16,'E');plank(344,348,9);eggs(344,8,5);vine(353,2,7);vine(362,2,7);arc(350,6,16,2);
+  plank(367,372,7);eggs(367,6,6);gold(370,3,2);eggs(345,13,4);eggs(356,13,6);b.doors.push({x:373*T,y:12*T,w:64,h:64,to:{zone:0,x:112*T,y:GY}});
   // secret room 2 (calm): treetop hut
-  fill(460,495,0,1,'F');fill(460,460,0,13,'F');fill(495,495,0,13,'F');fill(460,495,14,16,'F');eggs(464,13,4);plank(468,471,10);eggs(468,9,4);eggs(476,13,3);
-  b.chests.push({x:484*T,y:GY,open:false});b.items.push({t:'junk',kind:'banana',x:488*T,y:GY-26,w:26,h:24});b.doors.push({x:491*T,y:12*T,w:64,h:64,to:{zone:0,x:165*T,y:GY}});
+  fill(380,415,0,1,'F');fill(380,380,0,13,'F');fill(415,415,0,13,'F');fill(380,415,14,16,'F');eggs(384,13,4);plank(388,391,10);eggs(388,9,4);eggs(396,13,3);
+  b.chests.push({x:404*T,y:GY,open:false});b.items.push({t:'junk',kind:'banana',x:408*T,y:GY-26,w:26,h:24});b.doors.push({x:411*T,y:12*T,w:64,h:64,to:{zone:0,x:165*T,y:GY}});
   return b;}
 const LEVELS=[
   {name:'Pumpkin Patch',build:buildW1,floor:'#',rows:17,gy:14,arenaRow:14,easyFill:true,easyTo:345,finishX:338,zones:[{x0:0,x1:346*T,kind:'out'},{x0:348*T,x1:384*T,kind:'coop'},{x0:386*T,x1:430*T,kind:'cave'}],
    arena:[226,255],fenceX:225,penIn:()=>false,boss:'none',wfX:246,giantX:240,showCow:99999,escape:'pumpkin',crashCol:255,cowBoost:0,
    jumps:[['Start',5,14*T],['Tunnel',79,14*T],['Coop',121,14*T],['Cave',200,8*T],['Pen',221,14*T]],
    intro:()=>INTRO,introId:'intro',
-   penStory:[{who:'Hero',text:'There he is!'},{who:'Other',text:'Jump on his back, then tap JUMP every time he bucks so you don’t fall off!'},{who:'Other',text:'Stay on for 3 bucks, 3 times, and he’ll be too tired to run.'},{who:'Henry',text:'Moo. (Challenge accepted.)'}],penId:'pen2',
-   escStory:[{who:'Hero',text:'He’s… in a pumpkin.'},{who:'Other',text:'And he’s rolling toward the barn. Of course he is.'}],
+   penStory:[{who:'Other',text:'There he is! Jump on his back and tap JUMP every time he bucks.'},{who:'Other',text:'Stay on for 3 bucks, 3 times, and he’ll be too tired to run.'}],penId:'pen2',
+   escStory:[],
    clearLine:'Henry got away again… and he’s headed for the big red barn!'},
   {name:'Hayloft Heights',build:buildW2,floor:'S',rows:66,gy:63,arenaRow:12,vertical:true,fallHurt:true,
    zones:[{x0:0,x1:49*T,y0:0,y1:66*T,kind:'barn'},{x0:50*T,x1:86*T,y0:49*T,y1:66*T,kind:'loft'},{x0:88*T,x1:124*T,y0:49*T,y1:66*T,kind:'bin'}],
    arena:[8,37],fenceX:7,penIn:()=>false,finishX:44,finishY:55,safeFallX:38,wfX:28,giantX:0,showCow:99999,boss:'none',escape:'chute',chute:{x:38,wall:37,doors:41},outside:41,cowBoost:.4,baleDrop:true,
    jumps:[['Start',3,63*T],['Hay',12,63*T],['Lofts',20,52*T],['Gap',12,28*T],['Top',22,17*T]],
    intro:()=>INTRO2,introId:'intro2',introLevel:true,
-   penStory:[{who:'Hero',text:'Made it to the top! And there’s Henry in the hay ring.'},{who:'Other',text:'No riding this time. Rope him! Get him dizzy: make him bonk a wall, or send Pickles to pounce on him.'},{who:'Other',text:'Then get close and tap LASSO, and tap JUMP as fast as you can to win the tug-of-war. Three times!'},{who:'Henry',text:'Moo. (I have been doing squats.)'}],penId:'pen3',
-   escStory:[{who:'Hero',text:'Did he just… slide down the hay chute?'},{who:'Other',text:'And right out the barn doors. Toward the creek.'},{who:'Henry',text:'MOOOO! (Wheeee!)'}],
+   penStory:[{who:'Other',text:'Rope him! Make him bonk a wall or send Pickles to pounce, so he gets dizzy.'},{who:'Other',text:'Then tap LASSO and mash JUMP to win the tug-of-war. Three times!'}],penId:'pen3',
+   escStory:[],
    clearLine:'Henry slid down the hay chute and out the doors… he’s headed for the creek!'}];
 LEVELS.push({name:'Creek Crossing',build:buildW3,floor:'#',rows:17,gy:14,arenaRow:14,water:true,
    zones:[{x0:0,x1:341*T,kind:'creek'},{x0:343*T,x1:379*T,kind:'cave'},{x0:381*T,x1:417*T,kind:'shack'}],
    arena:[214,236],fenceX:null,penCheck:209,penIn:()=>false,finishX:325,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'corn',damX:317,cowBoost:0,
    jumps:[['Start',3,14*T],['Logs',48,14*T],['River',78,14*T],['Falls',131,14*T],['Chase',208,14*T]],
    intro:()=>INTRO3,introId:'intro3',introLevel:true,
-   penStory:[{who:'Hero',text:'Wait. Did he build a RAFT?!'},{who:'Other',text:'The creek’s moving fast. Keep up with him, and don’t fall behind!'},{who:'Other',text:'Land on his raft 3 times to tire him out.'},{who:'Henry',text:'Moo. (Ahoy.)'}],penId:'pen4',
-   escStory:[{who:'Hero',text:'He jumped off… right into the corn.'},{who:'Other',text:'A corn maze. Of course it’s a corn maze.'},{who:'Henry',text:'Moo! (Find me if you can!)'}],
+   penStory:[{who:'Hero',text:'Wait. Did he build a RAFT?!'},{who:'Other',text:'Keep up with him and land on his raft 3 times to tire him out!'}],penId:'pen4',
+   escStory:[],
    clearLine:'Henry floated off down the creek on a raft… next stop, the corn maze!'});
 LEVELS.push({name:'Corn Maze',build:buildW4,floor:'#',rows:17,gy:14,arenaRow:14,duck:true,corn:true,
    zones:[{x0:0,x1:310*T,kind:'corn'},{x0:312*T,x1:348*T,kind:'circle'},{x0:350*T,x1:386*T,kind:'shack'}],
@@ -1184,54 +1218,44 @@ LEVELS.push({name:'Smokehouse Showdown',build:buildW5,floor:'#',rows:17,gy:14,ar
    arena:[260,290],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,ufoX:268,henryX:279,
    jumps:[['Start',3,14*T],['Smoke',24,14*T],['Cellar',108,14*T],['House',166,14*T],['Yard',246,14*T]],
    intro:()=>INTRO5,introId:'intro5',introLevel:true,penStory:[],penId:'pen6',escStory:[],
-   ufoStory:[{who:'Hero',text:'Uh… is everybody seeing this?!'},{who:'Dad',text:'That’s a UFO. And it’s taking our COW.'},{who:'Mom',text:'I KNEW that crop circle was weird!'},{who:'Leo',text:'THAT. IS. SO. COOL.'},
-     {who:'Jake',text:'Hold on. I’m getting this on video.'},{who:'Nolan',text:'Can we keep the UFO instead?'},{who:'Lylah',text:'Bye bye, moo moo!'},{who:'Henry',text:'MOOOOO! (See you in space, losers!)'},
-     {who:'Narrator',text:'Henry is headed for outer space. Looks like this family needs a rocket.'},{who:'Logan',text:'DIBS on the window seat!'}],
+   ufoStory:[{who:'Hero',text:'Uh… is everybody seeing this?!'},{who:'Dad',text:'That’s a UFO. And it’s taking our COW.'},{who:'Leo',text:'THAT. IS. SO. COOL.'},{who:'Henry',text:'MOOOOO! (See you in space, losers!)'},{who:'Narrator',text:'Henry is headed for outer space. Looks like this family needs a rocket.'}],
    clearLine:'Henry got beamed up by a UFO… next stop: OUTER SPACE!'});
 LEVELS.push({name:'Launch Pad',build:buildW6,floor:'#',rows:17,gy:14,arenaRow:14,night:true,needParts:true,duck:true,
    zones:[{x0:0,x1:320*T,kind:'farmnight'},{x0:322*T,x1:358*T,kind:'shack'},{x0:360*T,x1:396*T,kind:'cave'}],
    arena:[280,300],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:294,
    jumps:[['Start',3,14*T],['Tower',33,14*T],['Barn',125,14*T],['Scaffold',194,14*T],['Pad',270,14*T]],
    intro:()=>INTRO6,introId:'intro6',introLevel:true,penStory:[],penId:'pen7',escStory:[],
-   launchStory:[{who:'Dad',text:'Everybody buckled in?'},{who:'Mom',text:'This is NOT how I pictured cookout weekend.'},{who:'Lylah',text:'Wheeeee!'},{who:'Hero',text:'Hang on, Henry. We’re coming for you!'},{who:'Narrator',text:'The farm gets smaller and smaller… next stop: the Moon.'}],
+   launchStory:[{who:'Dad',text:'Everybody buckled in?'},{who:'Mom',text:'This is NOT how I pictured cookout weekend.'},{who:'Narrator',text:'The farm gets smaller and smaller… next stop: the Moon!'}],
    clearLine:'The family blasted off after Henry… next stop: the Moon!'});
 LEVELS.push({name:'The Moon',build:buildW7,floor:'N',rows:17,gy:14,arenaRow:14,grav:.24,jumpV:10.4,jetpack:true,noPet:true,space:true,
-   zones:[{x0:0,x1:320*T,kind:'space'},{x0:322*T,x1:358*T,kind:'neon'},{x0:360*T,x1:396*T,kind:'neon',hue:190}],meteors:[134,197],
+   zones:[{x0:0,x1:320*T,kind:'space'},{x0:322*T,x1:358*T,kind:'crater'},{x0:360*T,x1:396*T,kind:'neon',hue:190}],meteors:[134,197],
    arena:[270,295],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:2,ufoLeaveX:282,ufoAt:296,
-   jumps:[['Start',5,14*T],['Bubbles',25,14*T],['Craters',72,14*T],['Meteors',129,14*T],['Aliens',200,14*T],['End',258,14*T]],
+   jumps:[['Start',5,14*T],['Bubbles',25,14*T],['Craters',72,14*T],['Meteors',129,14*T],['Mites',200,14*T],['End',258,14*T]],
    intro:()=>INTRO7,introId:'intro7',introLevel:true,penStory:[],penId:'pen8',escStory:[],
-   leaveStory:[{who:'Hero',text:'There’s the UFO! Henry’s right there in the window!'},{who:'Henry',text:'Moo! (Nice rocket. Catch me if you can!)'},{who:'Dad',text:'He’s heading for that giant field of asteroids.'},
-     {who:'Leo',text:'ASTEROIDS?! This is the BEST trip ever.'},{who:'Narrator',text:'Back to the rocket! Next stop: the Asteroid Belt.'}],
+   leaveStory:[],
    clearLine:'Henry’s UFO zoomed off toward the Asteroid Belt!'});
 LEVELS.push({name:'Asteroid Belt',build:buildW8,floor:'N',rows:17,gy:14,arenaRow:14,grav:.24,jumpV:10.4,jetpack:true,noPet:true,space:true,
-   zones:[{x0:0,x1:420*T,kind:'space'},{x0:422*T,x1:458*T,kind:'neon',hue:170},{x0:460*T,x1:496*T,kind:'neon',hue:320}],meteors:[258,330],
-   arena:[390,415],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:2,ufoLeaveX:400,ufoAt:413,
-   jumps:[['Start',5,14*T],['Drift',57,12*T],['Crumble',143,12*T],['Bubble',174,12*T],['Meteors',256,14*T],['End',386,14*T]],
+   zones:[{x0:0,x1:340*T,kind:'space'},{x0:342*T,x1:378*T,kind:'hollow'},{x0:380*T,x1:416*T,kind:'neon',hue:320}],meteors:[258,288],
+   arena:[310,335],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:2,ufoLeaveX:320,ufoAt:333,
+   jumps:[['Start',5,14*T],['Drift',57,12*T],['Crumble',143,12*T],['Bubble',174,12*T],['Meteors',256,14*T],['End',304,14*T]],
    intro:()=>INTRO8,introId:'intro8',introLevel:true,penStory:[],penId:'pen9',escStory:[],
-   leaveStory:[{who:'Hero',text:'Found him! The UFO’s parked right there!'},{who:'Henry',text:'Moo! (Out of space gas. Just kidding!)'},{who:'Nolan',text:'He’s heading for that big purple planet!'},
-     {who:'Mom',text:'Is that planet… purple?'},{who:'Narrator',text:'The UFO dives toward Planet Zorbix. Back to the rocket!'}],
+   leaveStory:[],
    clearLine:'Henry’s UFO dove toward Planet Zorbix!'});
 LEVELS.push({name:'Planet Zorbix',build:buildW9,floor:'G',rows:17,gy:14,arenaRow:14,grav:.75,space:true,zorb:true,
-   zones:[{x0:0,x1:400*T,kind:'zorbix'},{x0:402*T,x1:438*T,kind:'neon',hue:280},{x0:440*T,x1:476*T,kind:'neon',hue:140}],
-   arena:[370,398],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:2,throneX:362,
-   jumps:[['Start',5,14*T],['Square',54,14*T],['Geysers',96,14*T],['Market',166,14*T],['Hill',266,14*T],['Palace',352,14*T]],
+   zones:[{x0:0,x1:340*T,kind:'zorbix'},{x0:342*T,x1:378*T,kind:'arcade'},{x0:380*T,x1:416*T,kind:'neon',hue:140}],
+   arena:[310,338],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,rocketX:2,throneX:302,
+   jumps:[['Start',5,14*T],['Square',54,14*T],['Geysers',96,14*T],['Market',166,14*T],['Hill',262,14*T],['Palace',294,14*T]],
    intro:()=>INTRO9,introId:'intro9',introLevel:true,penStory:[],penId:'pen10',escStory:[],
-   throneStory:[{who:'Hero',text:'HENRY! We found you!'},{who:'Narrator',text:'Henry is sitting on a giant golden throne, wearing a crown, surrounded by cheering aliens.'},
-     {who:'Henry',text:'Moo?! (I have NO idea what’s happening. They keep bowing at me. Is this a dairy thing?)'},
-     {who:'Dad',text:'Uh… excuse me, alien friends? That’s our cow.'},{who:'Narrator',text:'The aliens look at each other… and cheer even LOUDER.'},
-     {who:'Zorbian',text:'Zib zib! The Great Space Cow’s family came to bring him home! Best. Day. EVER!'},
-     {who:'Henry',text:'MOOO! (Oh thank goodness. Get me out of here!)'},{who:'Mom',text:'Everybody into the rocket. Henry, you’re riding in the back.'},
-     {who:'Leo',text:'Can we at least keep the crown?'},{who:'Lylah',text:'Moo moo king!'}],
+   throneStory:[{who:'Hero',text:'HENRY! We found you!'},{who:'Narrator',text:'Henry is sitting on a giant golden throne, wearing a crown, surrounded by cheering aliens.'},{who:'Henry',text:'Moo?! (They keep bowing at me. Is this a dairy thing?)'},{who:'Dad',text:'Uh… excuse me, alien friends? That’s our cow.'},{who:'Zorbian',text:'Zib zib! The Great Space Cow’s family came to bring him home! Best. Day. EVER!'},{who:'Leo',text:'Can we at least keep the crown?'}],
    clearLine:'Henry is coming home! The aliens threw him a going-away party.'});
 LEVELS.push({name:'Crash Site Jungle',build:buildW10,floor:'E',rows:17,gy:14,arenaRow:14,space:true,air:true,jungle:true,duck:true,zibIntro:true,
-   zones:[{x0:0,x1:420*T,kind:'jungle'},{x0:422*T,x1:458*T,kind:'neon',hue:190},{x0:460*T,x1:496*T,kind:'shack'}],
-   arena:[390,415],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,endX:392,
-   jumps:[['Start',8,14*T],['Vines',64,14*T],['Mushrooms',110,14*T],['Tree',166,14*T],['Swing',300,14*T],['End',380,14*T]],
+   zones:[{x0:0,x1:340*T,kind:'jungle'},{x0:342*T,x1:378*T,kind:'cave'},{x0:380*T,x1:416*T,kind:'shack'}],
+   arena:[310,335],fenceX:null,penIn:()=>false,wfX:0,giantX:0,showCow:99999,boss:'none',escape:'none',cowBoost:0,endX:312,
+   jumps:[['Start',8,14*T],['Vines',64,14*T],['Mushrooms',110,14*T],['Tree',166,14*T],['Spikes',184,14*T],['Swing',280,14*T]],
    intro:()=>INTRO10,introId:'intro10',introLevel:true,penStory:[],penId:'pen11',escStory:[],
-   endStory:[{who:'Zib',text:'The jungle ends here! See those giant mushrooms? That’s Mushroom Village!'},{who:'Nolan',text:'Wait. Are the houses… mushrooms?'},
-     {who:'Zib',text:'The mushroom folks know the way to the Great Portal. Probably. Maybe.'},{who:'Henry',text:'Moo. (MAYBE?!)'},{who:'Dad',text:'Alright, team. Mushroom Village it is.'}],
-   clearLine:'Zib is leading the way to Mushroom Village!'});
-const CHAPTER=['Pumpkin Patch','Hayloft Heights','Creek Crossing','Corn Maze','Smokehouse Showdown','Launch Pad','The Moon','Asteroid Belt','Planet Zorbix','Crash Site Jungle','Mushroom Village'];
+   endStory:[],
+   clearLine:'Zib knows a shortcut… through the Crystal Caves!'});
+const CHAPTER=['Pumpkin Patch','Hayloft Heights','Creek Crossing','Corn Maze','Smokehouse Showdown','Launch Pad','The Moon','Asteroid Belt','Planet Zorbix','Crash Site Jungle','Crystal Caves'];
 const looseHay=h=>!!(h&&h.need&&L.g[h.need.y][h.need.x]==='B');
 
 /* ---------------- state ---------------- */
@@ -1300,6 +1324,20 @@ function stepAlien(e){if(e.cd==null){e.cd=40+((e.x/T)|0)%4*20;e.face=-1;}e.vy=Ma
   if(e.onG&&!solidC(tileAt(Math.floor((e.x+e.w/2+e.vx*8)/T),Math.floor((e.y+e.h+4)/T))))e.vx=0;}
 function drawAlien(e){const cx=e.x+e.w/2,fy=e.y+e.h+1;if(!e.alive){drawSpr(ALIEN.a,14,26,cx,fy-e.dead*2,1,1.2,1.2-e.dead*.03);return;}const air=!e.onG,sq=e.onG&&e.cd<12?1.15:1;
   drawSpr(air?ALIEN.b:ALIEN.a,14,26,cx,fy,e.face||1,1.15*sq,1.15/sq);}
+function stepMite(e){if(e.cd==null){e.cd=50+((e.x/T)|0)%4*25;e.face=-1;}e.vy=Math.min(e.vy+.18,5);moveY(e);
+  if(e.onG){e.vx*=.6;if(--e.cd<=0){const near=Math.abs(P.x-e.x)<300;e.face=P.x<e.x?-1:1;e.vy=-5.6;e.vx=(near?e.face:(Math.random()<.5?-1:1))*(HARD()?1.9:1.4);e.cd=EASY()?130:95;}}
+  const v=e.vx;moveX(e);if(e.hitW)e.vx=-v;if(e.onG&&!solidC(tileAt(Math.floor((e.x+e.w/2+e.vx*8)/T),Math.floor((e.y+e.h+4)/T))))e.vx=0;}
+function stepJelly(e){if(e.hx==null){e.hx=e.x;e.hy=e.y;e.k=((e.x/T)|0)*37;}e.k++;const r=EASY()?44:HARD()?84:64,sp=HARD()?.016:.012;
+  const nx=e.hx+Math.sin(e.k*sp)*r;e.face=nx>e.x?1:-1;e.x=nx;e.y=e.hy+Math.sin(e.k*.05)*14;}
+function stepWalker(e,speed){if(!e.vx)e.vx=-speed;e.vy=Math.min(e.vy+.6,10);moveY(e);const v=e.vx;moveX(e);if(e.hitW)e.vx=-v;
+  if(e.onG&&!solidC(tileAt(Math.floor((e.x+e.w/2+Math.sign(e.vx)*(e.w/2+4))/T),Math.floor((e.y+e.h+4)/T))))e.vx=-e.vx;e.face=e.vx>0?1:-1;}
+function stepFan(e){if(e.cd==null)e.cd=20+((e.x/T)|0)%5*12;e.vy=Math.min(e.vy+.5,9);moveY(e);e.face=P.x<e.x?-1:1;if(e.cheer>0)e.cheer--;
+  if(e.onG&&--e.cd<=0){e.vy=Math.abs(P.x-e.x)<220?-6:-3.5;e.cd=50+Math.floor(Math.random()*40);}}
+function drawCritter(e){const cx=e.x+e.w/2,fy=e.y+e.h+1,f=Math.floor(frame/10)%2;
+  if(e.t==='fan'){const sq=e.cheer>0?1.2:1;drawSpr(VILLAGER[e.v?'b':'a'],14,28,cx,fy,e.face||1,1.25*sq,1.25/sq);if(e.cheer>0)txt('ZIB!',cx,e.y-14,14,'#fff','#d94f8f',3);return;}
+  const S={mite:[MITE,14,24,1.1],jelly:[JELLY,15,32,1.05],blob:[BLOB,15,22,1.15],bot:[BOT,15,26,1.1]}[e.t];if(!S)return;
+  if(!e.alive){ctx.globalAlpha=Math.max(0,1-e.dead/40);drawSpr(S[0].a,S[1],S[2],cx,fy,e.face||1,S[3]*1.3,S[3]*Math.max(.15,1-e.dead*.05));ctx.globalAlpha=1;return;}
+  const fr=e.t==='mite'?(e.onG?S[0].a:S[0].b):(f?S[0].b:S[0].a);drawSpr(fr,S[1],S[2],cx,fy,e.face||1,S[3],S[3]);}
 function covered(){const x1=Math.floor((P.x+2)/T),x2=Math.floor((P.x+P.w-2)/T),ty=Math.floor(P.y/T);for(let y=ty-1;y>=Math.max(0,ty-5);y--)for(const tx of [x1,x2]){const c=tileAt(tx,y);if(solidC(c)||ONEWAY(c))return true;}return false;}
 function stepCrow(e){if(e.hx==null){e.hx=e.x;e.hy=e.y;e.st='hover';e.cd=90+((e.x/T)|0)%3*40;e.face=-1;}
   if(e.st==='hover'){const dx=e.hx-e.x,dy=e.hy-e.y;if(Math.abs(dx)>3||Math.abs(dy)>3){e.x+=Math.sign(dx)*Math.min(2.4,Math.abs(dx));e.y+=Math.sign(dy)*Math.min(2.4,Math.abs(dy));e.face=dx>0?1:-1;}
@@ -1497,7 +1535,7 @@ function standable(x,fy){const r=Math.floor(fy/T);for(const xx of [Math.floor((x
 function lastSafeSpot(){let best=null;for(const c of L.checks)if(c.on&&(!best||c.x>best.x))best=c;if(best&&standable(best.x,best.y||GY))return {x:best.x,y:(best.y||GY)-P.h};return {x:5*T,y:GY-P.h};}
 function fallPit(){if(!P.safe||!standable(P.safe.x,P.safe.y+P.h))P.safe=lastSafeSpot();unduck();P.peakY=null;P.climb=false;if(P.ride)endGooseRide(true);if(P.hat){P.hat=false;sfx('hatoff');}else if(!EASY()){P.hearts--;sfx('hurt');}
   if(P.hearts<=0){setState('oneMore');stopSong();return;}
-  P.x=P.safe.x;P.y=P.safe.y;P.vx=P.vy=0;P.inv=90;G.x=P.x-30;G.y=P.y+P.h-G.h;G.vy=0;burst(P.x+P.w/2,P.y+P.h,'#fff',8);updCam(true);}
+  P.zone=0;P.x=P.safe.x;P.y=P.safe.y;P.vx=P.vy=0;P.inv=90;G.x=P.x-30;G.y=P.y+P.h-G.h;G.vy=0;burst(P.x+P.w/2,P.y+P.h,'#fff',8);updCam(true);}
 function respawn(){if(LV.flight){P.hearts=MAXH();P.inv=120;P.x=L.check.x;flightReset();setState('play');startSong('level');return;}unduck();if(P.ride)endGooseRide(true);P.mount=null;P.hearts=MAXH();P.hat=false;P.inv=120;P.vx=P.vy=0;P.warp=null;P.sink=0;P.zone=0;P.climb=false;P.peakY=null;P.x=L.check.x;P.y=(L.check.y||GY)-P.h;if(!standable(P.x,P.y+P.h)){const sp=lastSafeSpot();P.x=sp.x;P.y=sp.y;}P.safe={x:P.x,y:P.y};
   G.x=P.x-34;G.y=P.y+P.h-G.h;G.mode='walk';L.ents=L.ents.filter(e=>e.t!=='pumpkin'&&e.t!=='bale');
   L.tug=null;jumpGlow(false);if(L.chase==='on'&&LV.boss==='chase')startRaftChase();if(L.chase==='on'){const wf=L.wf;wf.x=LV.wfX*T;wf.st='idle';wf.t=0;wf.face=-1;wf.rot=0;}
@@ -1511,10 +1549,11 @@ function bumpTile({tx,ty}){const c=L.g[ty][tx];
         if(hidden){spawnEggFountain(tx*T+16,ty*T,10);popText('SECRET CRATE!',tx*T+16,ty*T-30,'#ffc94a',true);sfx('secret');confetti(tx*T+16,ty*T,16);L.hints=L.hints.filter(h=>!(Math.abs(h.x-(tx*T+16))<4&&Math.abs(h.y-(ty*T+16))<4));}
         else{addEgg(1);parts.push({kind:'eggpop',x:tx*T+16,y:ty*T-4,vx:0,vy:-4,life:30});}}
       else{const above=solidC(tileAt(tx,ty-1));L.items.push({t:c==='Q'?'hat':'heart',x:tx*T+3,y:above?ty*T+T+2:ty*T-24,w:26,h:22,phys:true,slide:true,age:0,vx:(P.face||1)*1.8,vy:above?0:-5,grav:.35});burst(tx*T+16,ty*T,'#fff6c8',6,'star');}}
-    for(const e of L.ents)if(e.alive&&!e.saddle&&e.x<tx*T+T&&e.x+e.w>tx*T&&Math.abs(e.y+e.h-ty*T)<6)killEnemy(e);}
+    for(const e of L.ents)if(e.alive&&!e.saddle&&e.t!=='fan'&&e.x<tx*T+T&&e.x+e.w>tx*T&&Math.abs(e.y+e.h-ty*T)<6)killEnemy(e);}
   else sfx('bump');}
 function killEnemy(e){if(!e.alive)return;e.alive=false;e.dead=0;
   if(e.t==='alien'){sfx('pop');burst(e.x+13,e.y+12,'#7dff8a',12);return;}
+  if(e.t==='mite'||e.t==='jelly'||e.t==='blob'||e.t==='bot'){sfx(e.t==='bot'?'crash':'pop');burst(e.x+e.w/2,e.y+e.h/2,{mite:'#b9b6d9',jelly:'#ff9be0',blob:'#9b5cff',bot:'#ffd23f'}[e.t],12);return;}
   if(e.t==='crow'){sfx(e.bat?'pop':'caw');burst(e.x+13,e.y+9,'#3a3646',10);return;}
   if(e.t==='pumpkin'){e.gone=true;sfx('splat');burst(e.x+13,e.y+13,'#f08a24',12);}
   else if(e.t==='fish'){e.gone=true;sfx('splash');burst(e.x+13,e.y+8,'#bfe6ff',10);}
@@ -1659,7 +1698,7 @@ function stepPlay(){if(LV.flight){stepFlight();return;}
   if(P.onG)P.smokeHop=0;const pf0=P.y+P.h;moveX(P);if(P.zone===0&&ZONES&&ZONES[0]&&ZONES[0].y0==null&&P.x+P.w>ZONES[0].x1-4){P.x=ZONES[0].x1-4-P.w;if(P.vx>0)P.vx=0;}moveY(P);landLogs(P,pf0);
   if(LV.safeFallX){const inCh=P.x+P.w/2>=LV.safeFallX*T&&P.x+P.w/2<(LV.safeFallX+3)*T;if(inCh&&!P.onG&&P.vy>3){if(!P.tumble){sfx('whoosh');sfx('yeehaw');}P.tumble=(P.tumble||0)+1;if(P.tumble%3===0)parts.push({kind:'straw',x:P.x+P.w/2+(Math.random()-.5)*30,y:P.y+P.h/2,vx:(Math.random()-.5)*5,vy:-Math.random()*4,life:40,r:Math.random()*6});if(P.tumble%14===7)sfx('boing');}
     else if(P.tumble){if(P.onG&&P.tumble>15){P.dizzy=90;P.sq=1;shake=6;sfx('straw');sfx('bonk');for(let k=0;k<22;k++)parts.push({kind:'straw',x:P.x+P.w/2,y:P.y+P.h,vx:(Math.random()-.5)*10,vy:-Math.random()*7-1,life:50,r:Math.random()*6});}P.tumble=0;}}
-  if(P.spring&&P.onG){const sp=P.spring;L.springA={tx:sp.tx,ty:sp.ty,t:12};P.vy=sp.fw?(inp.jump?-27:-24.5):(inp.jump?-25:-22.5);if(sp.fw){if(tileAt(sp.tx+1,sp.ty)===' '){P.pushT=48;P.pushDir=1;}else if(tileAt(sp.tx-1,sp.ty)===' '){P.pushT=48;P.pushDir=-1;}shake=4;for(let k=0;k<16;k++)parts.push({kind:'star',x:sp.tx*T+16,y:sp.ty*T,vx:(Math.random()-.5)*7,vy:-Math.random()*6-1,life:30,c:['#ffd23f','#3fd0ff','#7dff8a','#ff6fb5'][k%4]});sfx('crash');}P.onG=false;P.jumping=false;P.coy=0;P.buf=0;P.sq=-1;P.chain=0;P.peakY=P.y;sfx('boing');parts.push({kind:'dust',x:P.x+P.w/2-8,y:P.y+P.h,vx:-1.5,vy:-.4,life:14},{kind:'dust',x:P.x+P.w/2+8,y:P.y+P.h,vx:1.5,vy:-.4,life:14});
+  if(P.spring&&P.onG){const sp=P.spring;L.springA={tx:sp.tx,ty:sp.ty,t:12};P.vy=sp.fw?(inp.jump?-27:-24.5):LV.jetpack?(inp.jump?-12.5:-11.5):(inp.jump?-25:-22.5);if(sp.fw){if(tileAt(sp.tx+1,sp.ty)===' '){P.pushT=48;P.pushDir=1;}else if(tileAt(sp.tx-1,sp.ty)===' '){P.pushT=48;P.pushDir=-1;}shake=4;for(let k=0;k<16;k++)parts.push({kind:'star',x:sp.tx*T+16,y:sp.ty*T,vx:(Math.random()-.5)*7,vy:-Math.random()*6-1,life:30,c:['#ffd23f','#3fd0ff','#7dff8a','#ff6fb5'][k%4]});sfx('crash');}P.onG=false;P.jumping=false;P.coy=0;P.buf=0;P.sq=-1;P.chain=0;P.peakY=P.y;sfx('boing');parts.push({kind:'dust',x:P.x+P.w/2-8,y:P.y+P.h,vx:-1.5,vy:-.4,life:14},{kind:'dust',x:P.x+P.w/2+8,y:P.y+P.h,vx:1.5,vy:-.4,life:14});
     if(!L.hinted.spring){L.hinted.spring=1;popText('BOING! Hold jump to go higher!',P.x+P.w/2,P.y-30,'#ffe9b8',true);}}
   if(L.springA&&--L.springA.t<=0)L.springA=null;
   // long falls hurt in climbing levels (Normal and Hard)
@@ -1714,12 +1753,14 @@ function stepPlay(){if(LV.flight){stepFlight();return;}
       e.vy+=e.grav;e.y+=e.vy;e.x+=e.vx;e.rot=e.vy*.07;if(e.vy>0&&e.y>GY+14){e.hide=true;e.wait=e.period-40;e.x=e.home+e.vx*0;continue;}}
     else if(e.t==='crow')stepCrow(e);
     else if(e.t==='alien')stepAlien(e);
+    else if(e.t==='mite')stepMite(e);else if(e.t==='jelly')stepJelly(e);else if(e.t==='blob')stepWalker(e,HARD()?1.1:EASY()?.55:.8);else if(e.t==='bot')stepWalker(e,HARD()?2.3:EASY()?1.3:1.7);else if(e.t==='fan')stepFan(e);
     else if(e.t==='snap'){if(e.ph==null)e.ph=((e.x/T)|0)*17%130;e.ph=(e.ph+1)%130;if(e.ph===100&&Math.abs(P.x-e.x)<400)sfx('bonk');}
     else if(e.t==='pumpkin'||e.t==='bale'){e.vy=Math.min(e.vy+.5,10);moveX(e);if(e.hitW){killEnemy(e);continue;}moveY(e);e.rot+=e.vx/13;if(e.y>ROWS*T+40)e.gone=true;}
-    if(G.mode==='dash'&&!e.saddle&&overlap(G,e)){killEnemy(e);sfx('bonk');popText(e.t==='goose'?'BONK!':e.t==='bale'?'POOF!':'SPLAT!',e.x+e.w/2,e.y-10,'#fff');addEgg(1);continue;}
+    if(G.mode==='dash'&&!e.saddle&&e.t!=='fan'&&overlap(G,e)){killEnemy(e);sfx('bonk');popText(e.t==='goose'?'BONK!':e.t==='bale'?'POOF!':'SPLAT!',e.x+e.w/2,e.y-10,'#fff');addEgg(1);continue;}
     if(overlap(P,e)){
       if(e.t==='snap'){if(e.ph>=100&&e.alive)hurt(e.x+e.w/2);if(state!=='play')return;continue;}
       if(e.saddle){if(!riding&&P.vy>0&&P.y+P.h-P.vy<=e.y+14){startGooseRide(e);continue;}continue;}
+      if(e.t==='fan'){if(P.vy>0&&P.y+P.h-P.vy<=e.y+16){P.vy=inp.jump?-16.5:-14.5;P.jumping=false;P.onG=false;e.cheer=30;sfx('boing');burst(e.x+e.w/2,e.y,'#ff9ccc',8,'star');}continue;}
       if(riding){killEnemy(e);P.vy=Math.min(P.vy,-6);addEgg(1);continue;}
       if(P.vy>0&&P.y+P.h-P.vy<=e.y+12){killEnemy(e);P.vy=inp.jump?-12:-9;P.jumping=inp.jump;sfx('stomp');P.chain++;
         if(P.chain>=2){const words=['','','DOUBLE!','TRIPLE!','QUAD!'];popText((words[P.chain]||'MEGA!')+' +'+P.chain,P.x+P.w/2,P.y-26,'#7fe3ff',true);for(let k=0;k<P.chain;k++)addEgg(1);}else addEgg(1);continue;}
@@ -1875,75 +1916,52 @@ function updCam(snap){const chase=!!L.chase&&P.zone===0;const zt=chase?1:zoomBas
 /* ---------------- story ---------------- */
 const INTRO=[
   {who:'Narrator',scene:'yard',text:'It’s cookout weekend on Philalack Farms!'},
-  {who:'Dad',scene:'yard',text:'Smoker’s clean. Pumpkins are ripe. Nothing can ruin this weekend.'},
   {who:'Mom',scene:'yard',text:'Honey… why is the gate open?'},
-  {who:'Hero',scene:'yard',text:'Oh no. HENRY!'},
   {who:'Henry',scene:'run',text:'MOOOOO! (Best day ever!)'},
   {who:'Narrator',scene:'gone',text:'Henry is loose. Again. Grab eggs, find secrets, and go get that cow!'}];
 const INTRO3=[
-  {who:'Narrator',text:'Henry shot out of the barn and rolled straight down to the creek.'},
+  {who:'Narrator',text:'Henry rolled straight down to the creek.'},
   {who:'Dad',text:'Cows can’t swim. Right? Cows can’t swim.'},
-  {who:'Mom',text:'That cow does whatever he wants.'},
-  {who:'Hero',text:'Then we’re crossing the creek. Watch out for the jumping fish.'},
-  {who:'Henry',text:'MOO. (Fish are not my friends.)'},
-  {who:'Narrator',text:'Hop the rocks, cross the bridges, duck the fish, and find what’s hiding behind the waterfall!'}];
+  {who:'Narrator',text:'Hop the rocks, duck the jumping fish, and find what’s hiding behind the waterfall!'}];
 const INTRO4=[
   {who:'Narrator',text:'Henry slipped off the raft and vanished into the corn maze.'},
-  {who:'Dad',text:'Every year I say we should make the maze smaller.'},
-  {who:'Mom',text:'And every year you make it BIGGER.'},
-  {who:'Hero',text:'Listen. The corn’s rustling. Something’s in there.'},
-  {who:'Henry',text:'Moo. (It’s me. Or is it?)'},
-  {who:'Narrator',text:'Walk through the rustling corn, climb to the high paths, and DUCK when the crows swoop!'}];
+  {who:'Mom',text:'Every year you make this maze BIGGER, honey.'},
+  {who:'Narrator',text:'Follow the rustling corn, climb the high paths, and DUCK when the crows swoop!'}];
 const INTRO5=[
-  {who:'Narrator',text:'The sun’s going down, and Henry is hiding somewhere behind the smokehouse.'},
+  {who:'Narrator',text:'The sun’s going down, and Henry is hiding behind the smokehouse.'},
   {who:'Dad',text:'If he touches my brisket, it’s over.'},
-  {who:'Mom',text:'Honey. He’s a cow. He is not eating your brisket.'},
-  {who:'Hero',text:'The smokers are puffing. We can ride the smoke right over those fences!'},
-  {who:'Henry',text:'Moo. (Come and get me.)'},
-  {who:'Narrator',text:'Ride the smoke, dodge the pumpkins and crows, and finally catch Henry!'}];
+  {who:'Narrator',text:'Ride the smoke over the fences, dodge the pumpkins and crows, and catch Henry!'}];
 const INTRO6=[
   {who:'Narrator',text:'Night falls on Philalack Farms. Somewhere up there, Henry is riding in a UFO.'},
-  {who:'Dad',text:'We need a rocket. I have… a water tank, some pipes, and fireworks from last Fourth of July.'},
+  {who:'Dad',text:'We need a rocket. I have a water tank, some pipes, and old fireworks.'},
   {who:'Mom',text:'Honey, that is the worst plan I’ve ever heard.'},
-  {who:'Hero',text:'Let’s do it!'},
-  {who:'Narrator',text:'Find all 5 rocket parts and bring them to the launch pad. Bounce on the fireworks pads to get up high!'}];
+  {who:'Narrator',text:'Find all 5 rocket parts and bring them to the launch pad!'}];
 const INTRO7=[
   {who:'Narrator',text:'BUMP. The family’s homemade rocket bounces down onto the Moon.'},
-  {who:'Leo',text:'Whoa. Is it just me, or does everything look WAY cooler up here?'},
+  {who:'Leo',text:'Whoa. Everything looks WAY cooler up here!'},
   {who:'Mom',text:'Helmets on. Pickles, you stay in the rocket.'},
-  {who:'Dad',text:'Low gravity. Hold jump and you’ll float like an astronaut.'},
-  {who:'Narrator',text:'Ride the anti-gravity bubbles, survive the meteor shower, and find Henry’s UFO!'}];
+  {who:'Narrator',text:'Hold jump to float, survive the meteor shower, and find Henry’s UFO!'}];
 const INTRO8=[
-  {who:'Narrator',text:'The rocket bumps down on a giant asteroid. The UFO is somewhere out there.'},
+  {who:'Narrator',text:'The rocket bumps down on a giant asteroid. The UFO is out there somewhere.'},
   {who:'Logan',text:'Pickles got the window seat AGAIN?'},
-  {who:'Dad',text:'Helmets on, jetpacks ready. We hop rock to rock from here.'},
-  {who:'Mom',text:'Of course we do.'},
-  {who:'Narrator',text:'Hop the floating asteroids! Some drift, red ones crumble, and JET can save you if you fall!'}];
+  {who:'Narrator',text:'Hop rock to rock! Some drift, red ones crumble, and JET can save you if you fall!'}];
 const INTRO9=[
-  {who:'Narrator',text:'The rocket lands on Planet Zorbix, right next to a little alien village.'},
-  {who:'Nolan',text:'Whoa. The aliens are… waving at us?'},
+  {who:'Narrator',text:'The rocket lands on Planet Zorbix, next to a little alien village. The aliens are… waving?'},
   {who:'Mom',text:'Everybody be polite. We are guests.'},
-  {who:'Dad',text:'Pickles, you’re back on duty. Those alien crates won’t move themselves.'},
-  {who:'Narrator',text:'Find Henry! Ride the goo geysers, and let Pickles pounce the purple crates out of your way.'}];
+  {who:'Narrator',text:'Find Henry! Bounce on the friendly aliens, ride the goo geysers, and watch out for goo blobs and runaway robots!'}];
 const INTRO10=[
   {who:'Narrator',text:'Halfway home, a meteor clips the rocket. KABOOM! Down they go, into a glowing jungle.'},
-  {who:'Dad',text:'Everybody okay? Pickles… are you chewing on a wire?'},
-  {who:'Narrator',text:'Something wiggles out of the cargo hold.'},
   {who:'Zib',text:'Zib zib! Hi! I’m Zib! I stowed away to see the universe!'},
   {who:'Mom',text:'Of course you did.'},
-  {who:'Zib',text:'Your rocket is toast. But there’s a Great Portal across the world that goes ANYWHERE. Even a farm! Follow me!'},
-  {who:'Henry',text:'Moo… (I JUST got rescued. Why is everything still weird?)'},
+  {who:'Zib',text:'Your rocket is toast. But the Great Portal can take you home. Follow me!'},
   {who:'Narrator',text:'Bounce on mushrooms, swing on vines, and watch out for spike pods!'}];
 const INTRO2=[
   {who:'Narrator',text:'Henry and his pumpkin rolled right into the big red barn.'},
-  {who:'Dad',text:'The barn. Where we keep all the hay. And the snacks.'},
   {who:'Mom',text:'He’s going for the snacks.'},
-  {who:'Hero',text:'Then we’re going up. Way up.'},
-  {who:'Henry',text:'MOOOO! (Hay is the best snack!)'},
-  {who:'Narrator',text:'Climb all the way to the top of the barn! Ladders, springy bales, and look out for rolling hay!'}];
+  {who:'Narrator',text:'Climb to the top of the barn! Ladders, springy bales, and look out for rolling hay!'}];
 const WHO_C={Zorbian:'#d94f8f',Zib:'#ff5fa8',Narrator:'#6b6f80',Henry:'#2a2426'};
 function speaker(w){if(w==='Hero')return hero().name;if(w==='Other')return hero().name==='Dad'?'Mom':'Dad';if(w==='Mom'&&hero().name==='Mom')return 'Dad';return w;}
-function runStory(lines,done,id,top){const seen=store.get('seen',{})||{};story={lines:lines.map(l=>({who:speaker(l.who),scene:l.scene||'level',text:l.text})),i:0,ch:0,done,id,skip:!!id,top:!!top};setState('story');}
+function runStory(lines,done,id,top){if(!lines||!lines.length){done();return;}const seen=store.get('seen',{})||{};story={lines:lines.map(l=>({who:speaker(l.who),scene:l.scene||'level',text:l.text})),i:0,ch:0,done,id,skip:true,top:!!top};setState('story');}
 function endStory(){const d=story.done,id=story.id;if(id){const s=store.get('seen',{})||{};s[id]=1;store.set('seen',s);}story=null;d();}
 function advanceStory(){const ln=story.lines[story.i];if(story.ch<ln.text.length){story.ch=ln.text.length;return;}
   story.i++;story.ch=0;stateT=0;if(story.i>=story.lines.length)endStory();}
@@ -2272,6 +2290,7 @@ function tileSpr(c,x,y){if(c==='V'||c==='Y'){const u=tileAt(x,y-1);return (u==='
   if(LV&&LV.space&&!LV.jungle&&c==='=')return TILE.spacebar;
   if(c==='A')return TILE.crumb;
   if(c==='E')return solidC(tileAt(x,y-1))?TILE.jung2:TILE.jung;
+  if(c==='J'&&LV&&LV.jetpack)return TILE.moonpad;
   if(c==='J'&&LV&&LV.jungle){const ci=Math.floor(x/7)%3,side=tileAt(x-1,y)!=='J'?'l':tileAt(x+1,y)!=='J'?'r':'m';return MUSH[ci+side];}
   if(c==='G')return solidC(tileAt(x,y-1))?TILE.zorb2:TILE.zorb;
   if(c==='B'&&LV&&LV.zorb)return TILE.zcrate;
@@ -2285,8 +2304,8 @@ function drawTiles(){const c1=Math.max(0,Math.floor(cam.x/T)-1),c2=Math.min(L.w-
     const s=tileSpr(c,x,y);if(c==='J'&&L.springA&&L.springA.tx===x&&L.springA.ty===y){const k=Math.sin(L.springA.t/12*Math.PI)*.3;ctx.drawImage(s,x*T-k*6,py+k*T,T+k*12,T*(1-k));continue;}
     if(s)ctx.drawImage(s,x*T,py,T,T);if(c==='B'&&L.cracks[x+','+y])ctx.drawImage(CRACK,x*T,py,T,T);
     if(c==='='&&LV.space){const nc=`hsl(${(frame*2+x*14)%360},100%,68%)`;ctx.globalAlpha=.3;ctx.fillStyle=nc;ctx.fillRect(x*T,py-4,T,4);ctx.fillRect(x*T,py+9,T,5);ctx.globalAlpha=1;ctx.fillStyle=nc;ctx.fillRect(x*T,py,T,2);}
-    if((c==='N'||c==='Z')&&LV.space&&!solidC(tileAt(x,y-1))){const nc=P.zone>0?`hsl(${(frame*2+x*14)%360},100%,68%)`:'rgba(150,240,255,.85)';ctx.globalAlpha=.25;ctx.fillStyle=nc;ctx.fillRect(x*T,py-5,T,5);ctx.globalAlpha=1;ctx.fillStyle=nc;ctx.fillRect(x*T,py,T,2);}
-    if((c==='N'||c==='Z')&&LV.space&&P.zone>0){for(const [dx,dy,w2,h2] of [[-1,0,2,T],[1,0,2,T]]){if(!solidC(tileAt(x+dx,y))&&tileAt(x+dx,y)!==undefined){ctx.fillStyle=`hsl(${(frame*2+y*20)%360},100%,68%)`;ctx.fillRect(dx<0?x*T:x*T+T-2,py,2,T);}}}
+    if((c==='N'||c==='Z')&&LV.space&&!solidC(tileAt(x,y-1))){const nc=P.zone>0&&(ZONES[P.zone].kind==='neon'||ZONES[P.zone].kind==='arcade')?`hsl(${(frame*2+x*14)%360},100%,68%)`:'rgba(150,240,255,.85)';ctx.globalAlpha=.25;ctx.fillStyle=nc;ctx.fillRect(x*T,py-5,T,5);ctx.globalAlpha=1;ctx.fillStyle=nc;ctx.fillRect(x*T,py,T,2);}
+    if((c==='N'||c==='Z')&&LV.space&&P.zone>0&&(ZONES[P.zone].kind==='neon'||ZONES[P.zone].kind==='arcade')){for(const [dx,dy,w2,h2] of [[-1,0,2,T],[1,0,2,T]]){if(!solidC(tileAt(x+dx,y))&&tileAt(x+dx,y)!==undefined){ctx.fillStyle=`hsl(${(frame*2+y*20)%360},100%,68%)`;ctx.fillRect(dx<0?x*T:x*T+T-2,py,2,T);}}}
     if(c==='N'&&LV.space&&y>0&&!solidC(tileAt(x,y+1))&&y<13){ctx.fillStyle='rgba(190,120,255,.35)';ctx.fillRect(x*T,py+T-2,T,2);}}}
 function drawFakeCorn(){if(!LV.corn||P.zone!==0)return;const c1=Math.max(0,Math.floor(cam.x/T)-1),c2=Math.min(L.w-1,Math.floor((cam.x+W/ZM)/T)+1);
   const pin=L.g[Math.floor((P.y+P.h/2)/T)]&&L.g[Math.floor((P.y+P.h/2)/T)][Math.floor((P.x+P.w/2)/T)]==='Y';
@@ -2492,7 +2511,7 @@ function drawGiant(){const pk=L.giant;if(LV.escape==='bale'){ctx.save();ctx.tran
 function drawHatch(d){const x=d.x,top=3*T,h=d.y-top;ctx.fillStyle='#2a160c';ctx.fillRect(x+4,top,56,h);ctx.fillStyle='#8a5326';ctx.fillRect(x+10,top,5,h);ctx.fillRect(x+49,top,5,h);for(let y=top+12;y<d.y;y+=18)ctx.fillRect(x+10,y,44,4);
   ctx.globalAlpha=.3+.12*Math.sin(frame*.05);ctx.fillStyle='#ffe9a8';ctx.fillRect(x+4,top,56,26);ctx.globalAlpha=1;txt('Hayloft ⬆',x+32,top-14,13,'#fff3d6',OL,3);}
 function drawWorld(){if(LV.flight){drawFlight();return;}const z=ZONES[P.zone],gyS=(GY-cam.y)*ZM,main=P.zone===0;
-  ({out:()=>paintOutside(cam.x,gyS),creek:()=>paintOutside(cam.x,gyS,'creek'),corn:()=>paintCornBg(cam.x,gyS),space:()=>paintSpace(cam.x,gyS),jungle:()=>paintJungle(cam.x,gyS),zorbix:()=>paintZorbix(cam.x,gyS),neon:()=>paintNeon(cam.x,z.hue||290),farmnight:()=>paintFarmNight(cam.x,gyS),dusk:()=>paintDusk(cam.x,gyS),circle:()=>paintNight(cam.x),shack:()=>paintCoop(cam.x),barn:()=>paintBarn(cam.x,cam.y),coop:()=>paintCoop(cam.x),loft:()=>paintLoft(cam.x),cave:()=>paintCave(cam.x),bin:()=>paintBin(cam.x)})[z.kind]();
+  ({out:()=>paintOutside(cam.x,gyS),creek:()=>paintOutside(cam.x,gyS,'creek'),corn:()=>paintCornBg(cam.x,gyS),space:()=>paintSpace(cam.x,gyS),jungle:()=>paintJungle(cam.x,gyS),zorbix:()=>paintZorbix(cam.x,gyS),neon:()=>paintNeon(cam.x,z.hue||290),crater:()=>paintCrater(cam.x),hollow:()=>paintHollow(cam.x),arcade:()=>paintArcade(cam.x),farmnight:()=>paintFarmNight(cam.x,gyS),dusk:()=>paintDusk(cam.x,gyS),circle:()=>paintNight(cam.x),shack:()=>paintCoop(cam.x),barn:()=>paintBarn(cam.x,cam.y),coop:()=>paintCoop(cam.x),loft:()=>paintLoft(cam.x),cave:()=>paintCave(cam.x),bin:()=>paintBin(cam.x)})[z.kind]();
   ctx.imageSmoothingEnabled=true;ctx.drawImage(bgc,0,0,W,H);ctx.imageSmoothingEnabled=false;
   if(z.kind==='barn'){for(let i=0;i<28;i++){const x=wrap(i*83+frame*.12-cam.x*.15,W),y=wrap(i*57+frame*.08,H)+Math.sin(frame*.02+i)*6;ctx.globalAlpha=.2+.18*Math.sin(frame*.05+i);ctx.fillStyle='#fff3c4';ctx.fillRect(x,y,2.5,2.5);}ctx.globalAlpha=1;}
   if(!main)for(let i=0;i<26;i++){const x=wrap(i*97+frame*.25,W),y=wrap(i*61-frame*.35,H),tw=.5+.5*Math.sin(frame*.08+i);ctx.globalAlpha=.35+.5*tw;ctx.fillStyle=RCOL[i%6];const s2=2+tw*3;ctx.fillRect(x-s2/2,y-.75,s2,1.5);ctx.fillRect(x-.75,y-s2/2,1.5,s2);}ctx.globalAlpha=1;
@@ -2521,7 +2540,7 @@ function drawWorld(){if(LV.flight){drawFlight();return;}const z=ZONES[P.zone],gy
   if(L.near&&!P.warp&&(L.near.exit||L.near.needDown)){const b=Math.abs(Math.sin(frame*.15))*8,x=L.near.x,y=L.near.y-(L.near.kind==='door'?84:P.h+40)-b;ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.moveTo(x-12,y);ctx.lineTo(x+12,y);ctx.lineTo(x,y+16);ctx.closePath();ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle=OL;ctx.stroke();rr(x-6,y-14,12,14,3);ctx.fill();ctx.stroke();}
   for(const it of L.items)drawItem(it);
   drawDrafts();
-  for(const e of L.ents){if(e.t==='goose')drawGoose(e);else if(e.t==='crow')drawCrow(e);else if(e.t==='alien')drawAlien(e);else if(e.t==='snap')drawSnap(e);else if(e.t==='fish'){if(e.hide&&e.wait<45&&e.alive){ctx.fillStyle='rgba(255,255,255,.85)';for(let k=0;k<3;k++){const bx=e.home+13+Math.sin(frame*.3+k*2)*8,by=GY+10-((frame*1.5+k*9)%14);ctx.beginPath();ctx.arc(bx,by,2.5,0,7);ctx.fill();}}if(!e.hide&&e.alive){ctx.save();ctx.translate(e.x+13,e.y+8);ctx.rotate(e.rot||0);ctx.scale(e.vx>0?-1:1,1);ctx.drawImage(FISH,-15,-8,30,16);ctx.restore();}}else if(e.t==='bale'){ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2);ctx.rotate(e.rot);ctx.drawImage(BALE,-16,-16,32,32);ctx.restore();}else{ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2);ctx.rotate(e.rot);ctx.drawImage(PUMP[0],-16,-15,32,26);ctx.restore();}}
+  for(const e of L.ents){if(e.t==='goose')drawGoose(e);else if(e.t==='crow')drawCrow(e);else if(e.t==='alien')drawAlien(e);else if(e.t==='snap')drawSnap(e);else if(e.t==='mite'||e.t==='jelly'||e.t==='blob'||e.t==='bot'||e.t==='fan')drawCritter(e);else if(e.t==='fish'){if(e.hide&&e.wait<45&&e.alive){ctx.fillStyle='rgba(255,255,255,.85)';for(let k=0;k<3;k++){const bx=e.home+13+Math.sin(frame*.3+k*2)*8,by=GY+10-((frame*1.5+k*9)%14);ctx.beginPath();ctx.arc(bx,by,2.5,0,7);ctx.fill();}}if(!e.hide&&e.alive){ctx.save();ctx.translate(e.x+13,e.y+8);ctx.rotate(e.rot||0);ctx.scale(e.vx>0?-1:1,1);ctx.drawImage(FISH,-15,-8,30,16);ctx.restore();}}else if(e.t==='bale'){ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2);ctx.rotate(e.rot);ctx.drawImage(BALE,-16,-16,32,32);ctx.restore();}else{ctx.save();ctx.translate(e.x+e.w/2,e.y+e.h/2);ctx.rotate(e.rot);ctx.drawImage(PUMP[0],-16,-15,32,26);ctx.restore();}}
   if(L.zib&&P.zone===0){const z=L.zib,talk=state==='story'&&story&&story.lines[story.i].who==='Zib';if(state==='story')drawZib(z.x,GY-(talk?Math.round(Math.abs(Math.sin(frame*.25))*8):0),-1,talk);else drawZib(z.x,GY,1,false);}
   if(L.runner)drawSpr(cowSpr(Math.floor(frame/4)%2?'walk1':'walk2'),52,75,L.runner.x,GY,1,.9,.9);
   if(P.zone===0&&(L.chase||P.x>LV.showCow*T)){drawWaffles();drawJumpOn();if(L.tug)drawRope();}
