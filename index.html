@@ -90,7 +90,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Holy Cow!</div>
 <script>
 'use strict';
-const VERSION='0.90';
+const VERSION='0.91';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search)||!/github\.io$/.test(location.hostname);
 /* =========================================================
@@ -1156,28 +1156,29 @@ function buildW9(){const {g,b,fill,egg,eggs,arc,gold,goose,sign,plank,block,grou
 /* Level 10: Crash Site Jungle. On foot now. Mushroom bounces, swinging vines, snap plants, jungle bats, Henry tags along. */
 function buildW10(){const {g,b,fill,egg,eggs,arc,gold,sign,plank,block,ground}=kit(417,'E');b.vines=[];b.mush=[];
   const mush=(x,row)=>{fill(x,x+2,row,row,'J');b.mush.push({x,row});},vine=(x,row,len)=>b.vines.push({ax:x*T+16,ay:row*T,len:len*T,ang:.3,av:0}),
+    vgems=(x,row,len,angs)=>{const r=len+.2;for(const a of (angs||[-.45,-.15,.15,.45,.75]))egg(x+.5+Math.sin(a)*r-.5,row+Math.cos(a)*r-.5);},
     snap=x=>b.ents.push(E('snap',x*T,GY-44,30,44)),bat=(x,row)=>b.ents.push(E('crow',x*T,row*T,26,18,{bat:true})),pit=(x1,x2)=>fill(x1,x2,14,16,' '),beacon=x=>b.checks.push({x:x*T,on:false}),wall=(x1,x2,top)=>fill(x1,x2,top,13,'E');
   ground(0,339);b.decor.push({kind:'wreck',x:4*T});
   sign(14,'Crash Site Jungle');eggs(15,13,4);g[10][20]='X';g[10][21]='M';g[10][22]='X';eggs(20,6,3);
   sign(26,'Bounce on the mushrooms!');mush(30,13);arc(30,6,4,2);wall(36,38,6);eggs(36,5,3);eggs(41,13,3);
   sign(45,'Spike pods puff up! Pass when they shrink.');snap(50);eggs(48,13,1);eggs(53,13,2);snap(57);eggs(60,13,2);beacon(63);
   // vines 1: learn to swing over a pit
-  sign(66,'Grab the vines! Jump to let go.');pit(70,90);vine(72,2,9);vine(80,2,9);vine(87,2,9);eggs(70,11,5);eggs(78,11,5);eggs(85,11,5);eggs(94,13,4);beacon(98);
+  sign(66,'Grab the vines! Jump to let go.');pit(70,90);vine(72,2,9);vine(80,2,9);vine(87,2,9);vgems(72,2,9);vgems(80,2,9);vgems(87,2,9,[-.45,-.15,.15,.45]);eggs(94,13,4);beacon(98);
   b.decor.push({kind:'waterfall',x:104*T});b.doors.push({x:105*T,y:12*T,w:64,h:64,to:{zone:1,x:345*T,y:GY},secret:'falls',title:'SECRET WATERFALL CAVE!',sub:'Hidden behind the falls!'});
   // mushroom staircase up to the gold
   eggs(110,13,2);mush(116,13);mush(122,11);mush(128,9);eggs(116,10,3);eggs(122,8,3);eggs(128,6,3);gold(129,1,0);bat(137,5);snap(141);eggs(144,13,3);
   b.decor.push({kind:'tree',x:158*T});plank(155,164,7);mush(151,13);eggs(155,6,3);b.doors.push({x:159*T,y:5*T,w:64,h:64,to:{zone:2,x:383*T,y:GY},secret:'treehut',calm:true,title:'SECRET TREETOP HUT!',sub:'Cozy up here…'});
   eggs(166,13,4);snap(172);beacon(176);eggs(180,13,3);
   // vines 2: no pit this time, but spike pods are waiting underneath. Gems ride the swing.
-  sign(186,'Swing over the spike pods!');vine(192,2,9);vine(201,2,9);vine(210,2,9);snap(195);snap(204);snap(213);arc(189,8,8,2);arc(198,8,8,2);arc(207,8,8,2);eggs(217,13,3);beacon(220);
+  sign(186,'Swing over the spike pods!');vine(192,2,9);vine(201,2,9);vine(210,2,9);snap(195);snap(204);snap(213);vgems(192,2,9);vgems(201,2,9);vgems(210,2,9,[-.45,-.15,.15,.45]);eggs(217,13,3);beacon(220);
   // mushroom up to the high branch
   g[10][226]='X';g[10][227]='R';g[10][228]='X';eggs(226,6,3);bat(233,5);mush(240,13);plank(244,250,6);eggs(244,5,6);gold(250,3,1);snap(256);eggs(259,13,3);
   wall(266,270,9);mush(262,13);eggs(266,8,5);eggs(273,13,3);beacon(279);
   // vines 3: the big one. Time your jump past the bat between the vines.
-  sign(282,'Big swing! Watch the bat!');pit(286,302);vine(288,2,9);vine(298,2,9);bat(293,4);eggs(286,11,4);eggs(296,11,4);eggs(304,13,4);
+  sign(282,'Big swing! Watch the bat!');pit(286,302);vine(288,2,9);vine(298,2,9);bat(293,4);vgems(288,2,9,[-.3,0,.3,.6]);vgems(298,2,9,[-.3,0,.3,.6]);eggs(304,13,4);
   b.decor.push({kind:'zib',x:320*T});sign(325,'Crystal Caves ➜');
   // secret room 1 (busy): waterfall cave with vines inside
-  fill(342,377,0,1,'E');fill(342,342,0,13,'E');fill(377,377,0,13,'E');fill(342,377,14,16,'E');plank(344,348,9);eggs(344,8,5);vine(353,2,7);vine(362,2,7);arc(350,6,16,2);
+  fill(342,377,0,1,'E');fill(342,342,0,13,'E');fill(377,377,0,13,'E');fill(342,377,14,16,'E');plank(344,348,9);eggs(344,8,5);vine(353,2,7);vine(362,2,7);vgems(353,2,7);vgems(362,2,7,[-.45,-.15,.15,.45]);
   plank(367,372,7);eggs(367,6,6);gold(370,3,2);eggs(345,13,4);eggs(356,13,6);b.doors.push({x:373*T,y:12*T,w:64,h:64,to:{zone:0,x:112*T,y:GY}});
   // secret room 2 (calm): treetop hut
   fill(380,415,0,1,'F');fill(380,380,0,13,'F');fill(415,415,0,13,'F');fill(380,415,14,16,'F');eggs(384,13,4);plank(388,391,10);eggs(388,9,4);eggs(396,13,3);
