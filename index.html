@@ -90,7 +90,7 @@ canvas{display:block;background:#4fb3ff;touch-action:none}
 <div id="rotate">🔄<br>Turn your device sideways<br>to play Holy Cow!</div>
 <script>
 'use strict';
-const VERSION='0.92';
+const VERSION='0.93';
 // Testing: add ?unlockall to the address to show "jump to" buttons on the home screen
 const TEST=/[?&]unlockall/.test(location.search)||!/github\.io$/.test(location.hostname);
 /* =========================================================
@@ -2040,7 +2040,7 @@ const MAPARROWS=()=>[{x:14,y:H-96,w:84,h:84,d:-1},{x:W-98,y:H-96,w:84,h:84,d:1}]
 function mapStep(d){for(let i=mapSel+d;i>=0&&i<LEVELS.length;i+=d)if(worldOpen(i)){mapSel=i;sfx('egg');return;}sfx('bump');}
 /* ---------------- farm map (world select) ---------------- */
 let mapSel=0,mapMsg=null;
-function worldOpen(i){if(i>=LEVELS.length)return false;if(TEST||i===0)return true;return (store.get('cleared',[])||[]).includes(i-1);}
+function worldOpen(i){if(i>=LEVELS.length)return false;if(TEST||i===0)return true;const c=store.get('cleared',[])||[];return c.includes(i-1)||c.some(x=>x>=i);}
 function goMap(){jumpGlow(false);story=null;resumeGame(true);startSong('menu');banner=null;mapMsg=null;mapSel=resumeInfo().w;setState('map');}
 // on the map: continue from your scarecrow if you have one in that level, otherwise start the level
 const savedIn=i=>{const ck=store.get('check',null);return !!(ck&&ck.w===i);};
